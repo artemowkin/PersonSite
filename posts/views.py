@@ -2,7 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from accounts.services import UserGetService
-from .services import PostGetService, PostCreateService, PostUpdateService, PostDeleteService
+from .services import (
+	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
+)
 from .serializers import PostSerializer
 
 
