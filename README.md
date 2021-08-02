@@ -9,7 +9,7 @@ To install this project you need to have the following tools installed on your P
 * `docker`
 * `docker-compose`
 
-Also you need to create a new `.env` file in base project directory:
+Also you need to create a new `.env` file in project base directory:
 
 ```
 $ touch .env
@@ -29,7 +29,7 @@ DJANGO_ENVIRONMENT="testing"
 
 ## Installing
 
-To install this project on your PC you need to do build the Docker image first:
+To install this project on your PC you need to build the Docker image first:
 
 ```
 $ docker-compose build
