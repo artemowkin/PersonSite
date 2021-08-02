@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from accounts.services import UserGetService
 from .services import (
 	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
 )
@@ -28,13 +27,14 @@ class AllCreatePostsView(APIView):
 			serializer_data |= {'pk': post.pk}
 			return Response(serializer_data, status=201)
 
-		return Response(serializer.errors)
+		return Response(serializer.errors, status=400)
 
 
 class PostPreviewUploadView(APIView):
 	"""View to upload preview image for post entry"""
 
-	service = PostGetService()
+	get_service = PostGetService()
+	update_service = PostUpdateService()
 
 	def put(self, request, pk, filename):
 		file_obj = request.data.get('file')
@@ -43,9 +43,8 @@ class PostPreviewUploadView(APIView):
 				{"error": "You need to send the file"}, status=400
 			)
 
-		post = self.service.get_concrete(pk)
-		post.preview = file_obj
-		post.save()
+		post = self.get_service.get_concrete(pk)
+		self.update_service.update_preview(post, file_obj)
 		return Response(status=204)
 
 
@@ -68,7 +67,7 @@ class ConcretePostView(APIView):
 			concrete_post, request.data, request.user
 		)
 		serialized_post = self.serializer_class(changed_post)
-		return Response(serialized_post.data, status=204)
+		return Response(serialized_post.data, status=200)
 
 	def delete(self, request, pk):
 		concrete_post = self.get_service.get_concrete(pk)
@@ -79,12 +78,10 @@ class ConcretePostView(APIView):
 class UserPostsView(APIView):
 	"""View to render all user posts entries"""
 
-	user_service = UserGetService()
-	post_service = PostGetService()
+	service = PostGetService()
 	serializer_class = PostSerializer
 
 	def get(self, request, user_pk):
-		user = self.user_service.get_concrete(user_pk)
-		user_posts = self.post_service.get_user_posts(user)
+		user_posts = self.service.get_user_posts(user_pk)
 		serializer = self.serializer_class(user_posts, many=True)
 		return Response(serializer.data)

@@ -2,6 +2,7 @@ from uuid import UUID
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model, QuerySet
+from django.shortcuts import get_object_or_404
 
 
 class BaseModelService:
@@ -21,7 +22,7 @@ class BaseGetEntryService:
 
 	def get_concrete(self, pk: UUID) -> Model:
 		"""Return a concrete model entry"""
-		return self.model.objects.get(pk=pk)
+		return get_object_or_404(self.model, pk=pk)
 
 	def get_all(self) -> QuerySet:
 		"""Return all model entries"""

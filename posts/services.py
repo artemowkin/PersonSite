@@ -1,3 +1,5 @@
+from typing import TextIO
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
@@ -21,9 +23,9 @@ class PostGetService(BaseGetEntryService):
 
 	model = Post
 
-	def get_user_posts(self, user: User) -> QuerySet:
+	def get_user_posts(self, user_pk: int) -> QuerySet:
 		"""Return concrete user posts"""
-		return self.model.objects.filter(author=user)
+		return self.model.objects.filter(author__pk=user_pk)
 
 
 class PostCreateService(BaseModelService):
@@ -44,6 +46,10 @@ class PostUpdateService:
 		post.text = data['text']
 		post.save()
 		return post
+
+	def update_preview(self, post: Post, file_obj: TextIO) -> None:
+		post.preview = file_obj
+		post.save()
 
 
 class PostDeleteService:
