@@ -36,10 +36,10 @@ class PostPreviewUploadView(APIView):
 
 	def put(self, request, pk, filename):
 		file_obj = request.data.get('file')
-        if not file_obj:
-            return Response(
-                {"error": "You need to send the file"}, status=400
-            )
+		if not file_obj:
+			return Response(
+				{"error": "You need to send the file"}, status=400
+			)
 
 		post = self.service.get_concrete(pk)
 		post.preview = file_obj
