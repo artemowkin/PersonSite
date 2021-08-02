@@ -1,10 +1,10 @@
 # PersonSite
 
-This is a site for any person who want to have his/her own blog and shop
+This is a site API for any person who want to have his/her own blog and shop
 
 ## Prerequisites
 
-To install this project you need to have installed on your PC the following tools:
+To install this project you need to have the following tools installed on your PC:
 
 * `docker`
 * `docker-compose`
