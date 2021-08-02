@@ -8,8 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Authentication
-    path('auth/', include('dj_rest_auth.urls')),
-    path('auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('auth/', include('accounts.urls')),
 
     # Local
     path('posts/', include('posts.urls')),
