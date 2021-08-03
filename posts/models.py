@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 
 User = get_user_model()
@@ -25,4 +26,4 @@ class Post(models.Model):
 		return self.title
 
 	def get_absolute_url(self):
-		pass
+		return reverse('concrete_post', args=(str(self.pk),))

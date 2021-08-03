@@ -71,7 +71,7 @@ class ConcretePostView(APIView):
 			serialized_post = self.serializer_class(changed_post)
 			return Response(serialized_post.data, status=200)
 
-		return Response(serializer.errors, status=400)
+		return Response(serialized_data.errors, status=400)
 
 	def delete(self, request, pk):
 		concrete_post = self.get_service.get_concrete(pk)

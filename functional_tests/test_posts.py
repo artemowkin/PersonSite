@@ -60,6 +60,31 @@ class AllPostsEndpointFunctionalTests(BasePostFunctionalTest):
 		self.assertIn('text', json_response)
 		self.assertEqual(posts_entries_count, 2)
 
+	def test_create_a_new_post_with_incorrect_data(self):
+		"""Test POST request on /posts/ endpoint with incorrect data"""
+		response = self.client.post(self.endpoint, {
+			'incorrect': 'data'
+		}, content_type='application/json')
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'title': ['This field is required.'],
+			'text': ['This field is required.']
+		})
+
+	def test_create_a_new_post_with_existing_title(self):
+		"""Test POST request on /posts/ endpoint with an existing title"""
+		response = self.client.post(self.endpoint, {
+			'title': 'Post title', 'text': 'Post text'
+		}, content_type='application/json')
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'title': ['post with this post title already exists.']
+		})
+
 
 class ConcretePostEndpointFunctionalTests(BasePostFunctionalTest):
 	"""Functional tests for /posts/{post_pk}/ endpoint"""
@@ -116,6 +141,24 @@ class ConcretePostEndpointFunctionalTests(BasePostFunctionalTest):
 		self.assertEqual(response.status_code, 403)
 		self.assertEqual(json_response, {
 			'detail': 'You do not have permission to perform this action.'
+		})
+
+	def test_update_a_concrete_post_with_incorrect_data(self):
+		"""
+		Test POST request on /posts/{post_pk}/ endpoint with
+		incorrect data
+		"""
+		response = self.client.put(
+			self.endpoint.format(post_pk=self.post.pk), {
+				'incorrect': 'data'
+			}, content_type='application/json'
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'title': ['This field is required.'],
+			'text': ['This field is required.']
 		})
 
 	def delete_request(self):
