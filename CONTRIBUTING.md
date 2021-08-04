@@ -4,8 +4,10 @@ If you want to contribute this project, you need to read this document
 
 ## Type of contributions
 
-If you're a frontend developer, you need to read the [Frontend developers guide] section.
-If you're a backend developer, you need to read the [Backend developers guide] section
+If you're a frontend developer, you need to read the
+[Frontend developers guide](#frontend-developers-guide) section.
+If you're a backend developer, you need to read the 
+[Backend developers guide](#backend-developers-guide) section
 
 ## Frontend developers guide
 
@@ -53,3 +55,5 @@ you can use to log in and interact with API
 ### Documantation
 
 API documentation is located on `/docs/` endpoint
+
+## Backend developers guide
