@@ -61,6 +61,20 @@ you can use to log in and interact with API
 
 > You need to run the `createsuperuser` command **ONLY ONCE**
 
+### Running
+
+To run the installed project you need to run the following command:
+
+```
+$ docker-compose up -d
+```
+
+If you want to stop the project, you can do the following:
+
+```
+$ docker-compose down
+```
+
 ### Documantation
 
 API documentation is located on `/docs/` endpoint
