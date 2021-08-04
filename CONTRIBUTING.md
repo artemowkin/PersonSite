@@ -11,7 +11,16 @@ If you're a backend developer, you need to read the
 
 ## Frontend developers guide
 
-### Installation
+### Prerequisites
+
+Create the `.env` file in base project directory with the following content:
+
+```
+DJANGO_SECRET_KEY="$km$wdm7+h3a=-4qftefvq+ct9@%&mc=w1^hl&!3^ekxixyjxj"
+DJANGO_ENVIRONMENT="testing"
+```
+
+### Installing
 
 Ok, you just want to use this project as RESTful backend. For this you need
 to install `docker` and `docker-compose` (if not installed) and run the following
