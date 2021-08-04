@@ -266,6 +266,16 @@ paths:
       responses:
         '204':
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You need to send the file"
+          description: When file has not be sending
       tags:
       - posts
   /posts/{post_pk}/:
