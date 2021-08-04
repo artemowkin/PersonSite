@@ -36,7 +36,7 @@ class PostPreviewUploadView(APIView):
 	get_service = PostGetService()
 	update_service = PostUpdateService()
 
-	def put(self, request, pk, filename):
+	def put(self, request, pk):
 		file_obj = request.data.get('file')
 		if not file_obj:
 			return Response(

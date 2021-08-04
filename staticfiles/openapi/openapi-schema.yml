@@ -1,0 +1,497 @@
+openapi: 3.0.2
+info:
+  title: 'PersonSite'
+  version: '1.0.0'
+paths:
+  /auth/login/:
+    post:
+      operationId: logIn
+      description: 'Check the credentials and return the REST Token
+
+        if the credentials are valid and authenticated.
+
+        Calls Django Auth login method to register User ID
+
+        in Django session framework
+
+
+        Accept the following POST parameters: username, password
+
+        Return the REST Framework Token Object''s key.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    example: "fee855a363856639cbf0b3065c338172edede65c"
+          description: ''
+      tags:
+      - auth
+  /auth/registration/:
+    post:
+      operationId: registration
+      description: 'Register a new user using POST with
+
+      required email and password'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    example: "fee855a363856639cbf0b3065c338172edede65c"
+      tags:
+      - auth
+  /auth/logout/:
+    post:
+      operationId: logOut
+      description: 'Calls Django logout method and delete the Token object
+
+        assigned to the current User object.
+
+
+        Accepts/Returns nothing.'
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Successfully logged out."
+          description: ''
+      tags:
+      - auth
+  /auth/user/:
+    get:
+      operationId: getUserDetails
+      description: 'Reads and updates UserModel fields
+
+        Accepts GET, PUT, PATCH methods.
+
+
+        Default accepted fields: username, first_name, last_name
+
+        Default display fields: pk, username, email, first_name, last_name
+
+        Read-only fields: pk, email
+
+
+        Returns UserModel fields.'
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+      tags:
+      - auth
+    put:
+      operationId: updateUserDetails
+      description: 'Reads and updates UserModel fields
+
+        Accepts GET, PUT, PATCH methods.
+
+
+        Default accepted fields: username, first_name, last_name
+
+        Default display fields: pk, username, email, first_name, last_name
+
+        Read-only fields: pk, email
+
+
+        Returns UserModel fields.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+      tags:
+      - auth
+    patch:
+      operationId: partialUpdateUserDetails
+      description: 'Reads and updates UserModel fields
+
+        Accepts GET, PUT, PATCH methods.
+
+
+        Default accepted fields: username, first_name, last_name
+
+        Default display fields: pk, username, email, first_name, last_name
+
+        Read-only fields: pk, email
+
+
+        Returns UserModel fields.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+      tags:
+      - auth
+  /posts/:
+    get:
+      operationId: listAllPosts
+      description: Return all posts entries
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+          description: ''
+      tags:
+      - posts
+    post:
+      operationId: createNewPost
+      description: Create a new post entry
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  required: true
+                  minLength: 1
+                  maxLength: 255
+                text:
+                  type: string
+                  required: true
+                  minLength: 1
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pk:
+                    type: string
+                    format: uuid
+                    minLength: 36
+                    maxLength: 36
+                  title:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                  text:
+                    type: string
+                    minLength: 1
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: array
+                    items:
+                      type: string
+                      example: "post with this post title already exists."
+                      description: Post title must be unique
+                  text:
+                    type: array
+                    items:
+                      type: string
+                      example: "This field may not be blank."
+          description: 'Error with data in request'
+      tags:
+      - posts
+  /posts/{post_pk}/set_preview/:
+    put:
+      operationId: uploadPostPreview
+      description: 'Upload or change the post preview. JS guide:
+
+      https://muffinman.io/blog/uploading-files-using-fetch-multipart-form-data/'
+      parameters:
+      - name: post_pk
+        in: path
+        required: true
+        description: 'Post pk field'
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema: {}
+      responses:
+        '204':
+          description: ''
+      tags:
+      - posts
+  /posts/{post_pk}/:
+    get:
+      operationId: getConcretePost
+      description: Get a concrete post entry
+      parameters:
+      - name: post_pk
+        in: path
+        required: true
+        description: 'Post pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+          description: ''
+      tags:
+      - posts
+    put:
+      operationId: updateConcretePost
+      description: Update a concrete post entry
+      parameters:
+      - name: post_pk
+        in: path
+        required: true
+        description: 'Post pk field'
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  required: true
+                  minLength: 1
+                  maxLength: 255
+                text:
+                  type: string
+                  required: true
+                  minLength: 1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: array
+                    items:
+                      type: string
+                      example: "post with this post title already exists."
+                      description: Post title must be unique
+                  text:
+                    type: array
+                    items:
+                      type: string
+                      example: "This field may not be blank."
+          description: 'Error with data in request'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not an author of the post
+
+          tries to update the post'
+      tags:
+      - posts
+    delete:
+      operationId: deleteConcretePost
+      description: Delete a concrete post entry
+      parameters:
+      - name: post_pk
+        in: path
+        required: true
+        description: 'Post pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not an author of the post
+
+          tries to delete the post'
+      tags:
+      - posts
+  /posts/user/{user_pk}/:
+    get:
+      operationId: getUserPosts
+      description: 'Return all user posts where this user
+
+      is an author of the post'
+      parameters:
+      - name: user_pk
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+          description: ''
+      tags:
+      - posts
+components:
+  schemas:
+    UserDetails:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+\z
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - username
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - password
+      - email
+    Register:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password1:
+          type: string
+          writeOnly: true
+        password2:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password1
+      - password2
+    Post:
+      type: object
+      properties:
+        pk:
+          type: string
+          readOnly: true
+          format: uuid
+          pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+          minLength: 36
+          maxLength: 36
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        text:
+          type: string
+          minLength: 1
+        preview:
+          type: string
+          example: "/static/posts_previews/preview.png"
+        author:
+          type: object
+          readOnly: true
+          properties:
+            pk:
+              type: integer
+              readOnly: true
+            username:
+              type: string
+              readOnly: true
+              pattern: ^[\w.@+-]+\z
+              maxLength: 150
+            email:
+              type: string
+              format: email
+              readOnly: true
