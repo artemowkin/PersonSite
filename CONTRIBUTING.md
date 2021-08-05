@@ -69,6 +69,8 @@ To run the installed project you need to run the following command:
 $ docker-compose up -d
 ```
 
+And go to the http://localhost:8000/
+
 If you want to stop the project, you can do the following:
 
 ```
