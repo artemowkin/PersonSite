@@ -37,7 +37,7 @@ class PostModelTests(TestCase):
 		self.assertEqual(string_entry, self.post.title)
 
 	def test_absolute_url(self):
-		"""Test does get_absolute_url() method returns valid url"""
+		"""Test does get_absolute_url() method return a valid url"""
 		url = self.post.get_absolute_url()
 
 		self.assertEqual(url, f'/posts/{self.post.pk}/')

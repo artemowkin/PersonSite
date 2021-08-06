@@ -432,6 +432,21 @@ paths:
           description: ''
       tags:
       - posts
+  /shop/products/:
+    get:
+      operationId: getShopProducts
+      description: Return all available products in shop
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+      tags:
+        - shop
 components:
   schemas:
     UserDetails:
@@ -504,7 +519,7 @@ components:
           minLength: 1
         preview:
           type: string
-          example: "/static/posts_previews/preview.png"
+          example: "/media/posts_previews/preview.png"
         author:
           type: object
           readOnly: true
@@ -521,3 +536,43 @@ components:
               type: string
               format: email
               readOnly: true
+    Product:
+      type: object
+      properties:
+        pk:
+          type: string
+          readOnly: true
+          format: uuid
+          pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+          minLength: 36
+          maxLength: 36
+        image:
+          type: string
+          example: "/media/shop/products_previews/image.png"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        short_description:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          minLength: 1
+        price:
+          type: number
+          format: double
+          example: "100.00"
+        amount:
+          type: integer
+          example: 100
+        available:
+          type: boolean
+          example: true
+      required:
+      - title
+      - short_description
+      - description
+      - price
+      - amount

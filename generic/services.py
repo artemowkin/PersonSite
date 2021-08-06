@@ -17,7 +17,7 @@ class BaseModelService:
 			)
 
 
-class BaseGetEntryService:
+class BaseGetEntryService(BaseModelService):
 	"""Base service to get entries"""
 
 	def get_concrete(self, pk: UUID) -> Model:
