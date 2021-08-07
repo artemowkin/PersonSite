@@ -528,6 +528,26 @@ paths:
           description: 'When user who is not a superuser tries to create the product.'
       tags:
         - shop
+  /shop/products/{product_pk}/:
+    get:
+      operationId: getConcreteShopProduct
+      description: Return a concrete shop product
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+      tags:
+        - shop
 components:
   schemas:
     UserDetails:
