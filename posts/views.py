@@ -62,8 +62,8 @@ class ConcretePostView(APIView):
 		return Response(serializer.data)
 
 	def put(self, request, pk):
-		serialized_data = self.serializer_class(data=request.data)
-		if serialized_data.is_valid():
+		serializer = self.serializer_class(data=request.data)
+		if serializer.is_valid():
 			concrete_post = self.get_service.get_concrete(pk)
 			changed_post = self.update_service.update(
 				concrete_post, request.data, request.user
@@ -71,7 +71,7 @@ class ConcretePostView(APIView):
 			serialized_post = self.serializer_class(changed_post)
 			return Response(serialized_post.data, status=200)
 
-		return Response(serialized_data.errors, status=400)
+		return Response(serializer.errors, status=400)
 
 	def delete(self, request, pk):
 		concrete_post = self.get_service.get_concrete(pk)

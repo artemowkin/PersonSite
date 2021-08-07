@@ -42,7 +42,7 @@ class ConcretePostViewTests(BaseViewTest):
 		self.assertEqual(response.status_code, 200)
 
 	def test_put(self):
-		"""Test does PUT request return 201 response"""
+		"""Test does PUT request return 200 response"""
 		response = self.client.put(
 			reverse(self.urlpattern, args=(str(self.post.pk),)),
 			{'title': 'Edited post', 'text': 'Some text'},

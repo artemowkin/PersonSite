@@ -97,3 +97,47 @@ class ConcreteProductEndpointFunctionalTests(BaseProductsFunctionalTest):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(json_response, self.serialized_product)
+
+	def put_request(self):
+		"""Request PUT on /shop/products/{product_pk}/ endpoint"""
+		return self.client.put(
+			self.endpoint.format(product_pk=self.product.pk), {
+				'title': 'New title',
+				'short_description': 'Some short description',
+				'description': 'Some description', 'price': '100.00',
+				'amount': 500, 'available': True
+			}, content_type='application/json'
+		)
+
+	def bad_login(self):
+		"""Login the bad user"""
+		bad_user = User.objects.create_user(
+			username='baduser', password='badpass'
+		)
+		self.client.login(username='baduser', password='badpass')
+
+	def test_update_a_concrete_product(self):
+		"""
+		Test PUT request on /shop/products/{product_pk}/ endpoint with
+		correct user
+		"""
+		response = self.put_request()
+		json_response = json.loads(response.content)
+		self.serialized_product['title'] = 'New title'
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, self.serialized_product)
+
+	def test_update_a_concrete_product_with_bad_user(self):
+		"""
+		Test PUT request on /shop/products/{product_pk}/ endpoint with
+		incorrect user
+		"""
+		self.bad_login()
+		response = self.put_request()
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 403)
+		self.assertEqual(json_response, {
+			'detail': 'You do not have permission to perform this action.'
+		})

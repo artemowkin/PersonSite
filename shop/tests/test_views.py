@@ -46,3 +46,15 @@ class ConcreteProductViewTests(BaseViewTest):
 			self.urlpattern, args=(str(self.product.pk),)
 		))
 		self.assertEqual(response.status_code, 200)
+
+	def test_put(self):
+		"""Test does PUT request return 200 response"""
+		response = self.client.put(
+			reverse(self.urlpattern, args=(str(self.product.pk),)), {
+				'title': 'New product',
+				'short_description': 'New short description',
+				'description': 'New description', 'price': '200.00',
+				'amount': 100
+			}, content_type='application/json'
+		)
+		self.assertEqual(response.status_code, 200)
