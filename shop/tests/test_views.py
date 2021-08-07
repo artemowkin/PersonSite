@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from generic.module_tests import BaseViewTest
+from ..models import Product
 
 
 User = get_user_model()
@@ -24,3 +25,24 @@ class AllCreateProductsViewTests(BaseViewTest):
 			'amount': 100
 		}, content_type='application/json')
 		self.assertEqual(response.status_code, 201)
+
+
+class ConcreteProductViewTests(BaseViewTest):
+	"""Case of testing ConcretePostView view"""
+
+	model = Product
+	urlpattern = 'concrete_product'
+
+	def setUp(self):
+		super().setUp()
+		self.product = Product.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+
+	def test_get(self):
+		"""Test does GET request return 200 response"""
+		response = self.client.get(reverse(
+			self.urlpattern, args=(str(self.product.pk),)
+		))
+		self.assertEqual(response.status_code, 200)

@@ -82,3 +82,18 @@ class AllProductsEndpointFunctionalTests(BaseProductsFunctionalTest):
 		response = self._request_create_a_new_product()
 
 		self.assertEqual(response.status_code, 403)
+
+
+class ConcreteProductEndpointFunctionalTests(BaseProductsFunctionalTest):
+	"""Functional tests for /shop/products/{product_pk}/ endpoint"""
+
+	endpoint = '/shop/products/{product_pk}/'
+
+	def test_get_a_concrete_product(self):
+		response = self.client.get(
+			self.endpoint.format(product_pk=self.product.pk)
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, self.serialized_product)

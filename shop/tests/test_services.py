@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 
 from ..models import Product
 from ..services import ProductsGetService, ProductCreateService
@@ -20,6 +21,20 @@ class ProductsGetServiceTests(TestCase):
 			title='Some product', short_description='Some short description',
 			description='Some description', price='100.00', amount=500,
 		)
+
+	def test_get_concrete_with_correct_pk(self):
+		"""Test does get_concrete() method return a concrete product"""
+		product = self.service.get_concrete(self.product.pk)
+
+		self.assertEqual(product, self.product)
+
+	def test_get_concrete_with_incorrect_pk(self):
+		"""
+		Test does get_concrete() method with non-existing
+		product pk raises Http404 extension
+		"""
+		with self.assertRaises(Http404):
+			self.service.get_concrete(10)
 
 	def test_get_all(self):
 		"""Test does get_all() method return all products"""

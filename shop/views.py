@@ -26,3 +26,15 @@ class AllCreateProductsView(APIView):
 			return Response(serializer_data, status=201)
 
 		return Response(serializer.errors, status=400)
+
+
+class ConcreteProductView(APIView):
+	"""View to render a concrete product"""
+
+	get_service = ProductsGetService()
+	serializer_class = ProductSerializer
+
+	def get(self, request, pk):
+		concrete_product = self.get_service.get_concrete(pk)
+		serializer = self.serializer_class(concrete_product)
+		return Response(serializer.data)
