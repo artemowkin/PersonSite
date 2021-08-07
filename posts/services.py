@@ -5,7 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 
 from generic.services import (
-	BaseGetEntryService, BaseModelService, check_is_user_superuser
+	BaseGetEntryService, BaseModelService, check_is_user_superuser,
+	BaseAdminCreateService
 )
 
 from .models import Post
@@ -24,14 +25,10 @@ class PostGetService(BaseGetEntryService):
 		return self.model.objects.filter(author__pk=user_pk)
 
 
-class PostCreateService(BaseModelService):
+class PostCreateService(BaseAdminCreateService):
 	"""Service to create a new post entry"""
 
 	model = Post
-
-	def create(self, data: dict, user: User) -> Post:
-		check_is_user_superuser(user)
-		return self.model.objects.create(**data)
 
 
 class PostUpdateService:

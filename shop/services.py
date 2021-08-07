@@ -1,14 +1,9 @@
 from django.db.models import QuerySet, Model
-from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
 
 from generic.services import (
-	BaseGetEntryService, BaseModelService, check_is_user_superuser
+	BaseGetEntryService, BaseModelService, BaseAdminCreateService
 )
 from .models import Product
-
-
-User = get_user_model()
 
 
 class ProductsGetService(BaseGetEntryService):
@@ -21,12 +16,7 @@ class ProductsGetService(BaseGetEntryService):
 		return self.model.objects.filter(available=True)
 
 
-class ProductCreateService(BaseModelService):
+class ProductCreateService(BaseAdminCreateService):
 	"""Service to create a new product entry"""
 
 	model = Product
-
-	def create(self, data: dict, user: User) -> Product:
-		"""Create a new entry using data"""
-		check_is_user_superuser(user)
-		return self.model.objects.create(**data)
