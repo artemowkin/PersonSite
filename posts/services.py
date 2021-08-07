@@ -6,8 +6,9 @@ from django.db.models import QuerySet
 
 from generic.services import (
 	BaseGetEntryService, BaseModelService, check_is_user_superuser,
-	BaseAdminCreateService
+	BaseCreateService, BaseUpdateService
 )
+from generic.strategies import CheckIsUserAdminStrategy
 
 from .models import Post
 
@@ -25,21 +26,21 @@ class PostGetService(BaseGetEntryService):
 		return self.model.objects.filter(author__pk=user_pk)
 
 
-class PostCreateService(BaseAdminCreateService):
+class PostCreateService(BaseCreateService):
 	"""Service to create a new post entry"""
 
 	model = Post
+	check_user_strategy = CheckIsUserAdminStrategy()
 
 
-class PostUpdateService:
+class PostUpdateService(BaseUpdateService):
 	"""Service to update a concrete post entry"""
 
-	def update(self, post: Post, data: dict, user: User) -> Post:
-		check_is_user_superuser(user)
-		post.title = data['title']
-		post.text = data['text']
-		post.save()
-		return post
+	check_user_strategy = CheckIsUserAdminStrategy()
+
+	def set_entry_fields(self, entry: Post, data: dict) -> None:
+		entry.title = data['title']
+		entry.text = data['text']
 
 	def update_preview(self, post: Post, file_obj: TextIO) -> None:
 		post.preview = file_obj

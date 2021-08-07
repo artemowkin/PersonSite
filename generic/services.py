@@ -5,6 +5,8 @@ from django.db.models import Model, QuerySet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
+from .strategies import CheckUserStrategy, CheckIsUserAdminStrategy
+
 
 User = get_user_model
 
@@ -41,9 +43,11 @@ class BaseGetEntryService(BaseModelService):
 class BaseCreateService(BaseModelService):
 	"""Base service to create entries"""
 
+	check_user_strategy = CheckUserStrategy()
+
 	def check_user(self, user: User):
 		"""User authorization"""
-		pass
+		return self.check_user_strategy.check_user(user)
 
 	def create(self, data: dict, user: User) -> Model:
 		"""Create a new entry using data"""
@@ -51,10 +55,22 @@ class BaseCreateService(BaseModelService):
 		return self.model.objects.create(**data)
 
 
-class BaseAdminCreateService(BaseCreateService):
-	"""Base service to create entries with checking is user superuser"""
+class BaseUpdateService:
+	"""Base service to update the concrete entry"""
+
+	check_user_strategy = CheckUserStrategy()
 
 	def check_user(self, user: User):
-		"""Check is user supseruser"""
-		if not user.is_superuser:
-			raise PermissionDenied
+		"""User authorization"""
+		return self.check_user_strategy.check_user(user)
+
+	def set_entry_fields(self, entry: Model, data: dict) -> None:
+		"""Set fields for entry using data"""
+		pass
+
+	def update(self, entry: Model, data: dict, user: User) -> Model:
+		"""Update the model entry using data"""
+		self.check_user(user)
+		self.set_entry_fields(entry, data)
+		entry.save()
+		return entry

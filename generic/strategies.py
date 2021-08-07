@@ -1,0 +1,22 @@
+from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
+
+
+User = get_user_model()
+
+
+class CheckUserStrategy:
+	"""Strategy with logic to check user authorization"""
+
+	def check_user(self, user: User):
+		"""Authorize user"""
+		pass
+
+
+class CheckIsUserAdminStrategy:
+	"""Strategy with logic to check is user admin"""
+
+	def check_user(self, user: User):
+		"""Check is user admin"""
+		if not user.is_superuser:
+			raise PermissionDenied
