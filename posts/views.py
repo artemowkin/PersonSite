@@ -1,33 +1,19 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from generic.views import BaseAllCreateView
 from .services import (
 	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
 )
 from .serializers import PostSerializer
 
 
-class AllCreatePostsView(APIView):
+class AllCreatePostsView(BaseAllCreateView):
 	"""View to render all posts entries"""
 
 	create_service = PostCreateService()
-	service = PostGetService()
+	get_service = PostGetService()
 	serializer_class = PostSerializer
-
-	def get(self, request):
-		all_posts = self.service.get_all()
-		serializer = self.serializer_class(all_posts, many=True)
-		return Response(serializer.data)
-
-	def post(self, request):
-		serializer = self.serializer_class(data=request.data)
-		if serializer.is_valid():
-			post = self.create_service.create(serializer.data, request.user)
-			serializer_data = serializer.data
-			serializer_data |= {'pk': post.pk}
-			return Response(serializer_data, status=201)
-
-		return Response(serializer.errors, status=400)
 
 
 class PostPreviewUploadView(APIView):
