@@ -447,6 +447,111 @@ paths:
                   $ref: "#/components/schemas/Product"
       tags:
         - shop
+    post:
+      operationId: createNewShopProduct
+      description: 'Create a new shop product. This endpoint is available only for
+
+      administrators'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                short_description:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  minLength: 1
+                price:
+                  type: number
+                  format: double
+                  example: "100.00"
+                amount:
+                  type: integer
+                  example: 100
+                available:
+                  type: boolean
+                  example: true
+              required:
+              - title
+              - short_description
+              - description
+              - price
+              - amount
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  pk:
+                    type: string
+                    readOnly: true
+                    format: uuid
+                    pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+                    minLength: 36
+                    maxLength: 36
+                  title:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                  short_description:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                  description:
+                    type: string
+                    minLength: 1
+                  price:
+                    type: number
+                    format: double
+                    example: "100.00"
+                  amount:
+                    type: integer
+                    example: 100
+                  available:
+                    type: boolean
+                    example: true
+                required:
+                - pk
+                - title
+                - short_description
+                - description
+                - price
+                - amount
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: array
+                    items:
+                      type: string
+                      example: "product with this product title already exists."
+                      description: Product title must be unique
+          description: 'Error with data in request'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not a superuser tries to create the product.'
+      tags:
+        - shop
 components:
   schemas:
     UserDetails:
