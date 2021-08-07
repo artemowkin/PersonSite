@@ -8,7 +8,7 @@ class Product(models.Model):
 	image = models.ImageField(
 		'product image', upload_to='shop/products_previews'
 	)
-	title = models.CharField('product title', max_length=255)
+	title = models.CharField('product title', max_length=255, unique=True)
 	short_description = models.CharField(
 		'product short description', max_length=255
 	)
