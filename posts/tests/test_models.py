@@ -20,7 +20,7 @@ class PostModelTests(TestCase):
 			username='testuser', password='testpass'
 		)
 		self.post = self.model.objects.create(
-			title='Some post', text='Some text', author=self.user
+			title='Some post', text='Some text'
 		)
 
 	def test_model_entry_fields(self):

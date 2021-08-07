@@ -1,8 +1,13 @@
 from uuid import UUID
 
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models import Model, QuerySet
 from django.shortcuts import get_object_or_404
+
+
+def check_is_user_superuser(user):
+	if not user.is_superuser:
+		raise PermissionDenied
 
 
 class BaseModelService:

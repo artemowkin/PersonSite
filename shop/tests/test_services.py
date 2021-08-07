@@ -31,7 +31,7 @@ class ProductsGetServiceTests(TestCase):
 	def test_get_all_doesnt_return_not_available_products(self):
 		"""Test does get_all() not return not available products"""
 		not_available_product = Product.objects.create(
-			title='Some product', short_description='Some short description',
+			title='New product', short_description='Some short description',
 			description='Some description', price='100.00', amount=500,
 			available=False
 		)

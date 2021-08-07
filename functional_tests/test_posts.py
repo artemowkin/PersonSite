@@ -21,14 +21,11 @@ class BasePostFunctionalTest(TestCase):
 		)
 		self.client.login(username='testuser', password='testpass')
 		self.post = self.model.objects.create(
-			title='Post title', text='Post text', author=self.user
+			title='Post title', text='Post text'
 		)
 		self.serialized_post = {
 			'pk': str(self.post.pk), 'title': 'Post title',
-			'text': 'Post text', 'preview': None, 'author': {
-				'pk': self.user.pk, 'username': 'testuser',
-				'email': 'testuser@gmail.com'
-			},
+			'text': 'Post text', 'preview': None,
 			'pub_date': str(self.post.pub_date)
 		}
 
@@ -111,7 +108,7 @@ class ConcretePostEndpointFunctionalTests(BasePostFunctionalTest):
 
 	def bad_login(self):
 		"""Login the bad user"""
-		bad_user = User.objects.create_superuser(
+		bad_user = User.objects.create_user(
 			username='baduser', password='badpass'
 		)
 		self.client.login(username='baduser', password='badpass')
@@ -189,36 +186,3 @@ class ConcretePostEndpointFunctionalTests(BasePostFunctionalTest):
 
 		self.assertEqual(response.status_code, 403)
 		self.assertEqual(posts_entries_count, 1)
-
-
-class UserPostsEndpointFunctionalTests(BasePostFunctionalTest):
-	"""Functional tests for /posts/users/{user_pk}/ endpoint"""
-
-	endpoint = '/posts/user/{user_pk}/'
-
-	def test_get_correct_user_posts(self):
-		"""
-		Test GET request on /posts/user/{user_pk}/ endpoint with
-		current user
-		"""
-		response = self.client.get(
-			self.endpoint.format(user_pk=self.user.pk)
-		)
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, [self.serialized_post])
-		self.assertEqual(json_response[0]['author']['pk'], self.user.pk)
-
-	def test_get_incorrect_user_posts(self):
-		"""
-		Test GET request on /posts/user/{user_pk}/ endpoint with
-		non-existent user_pk
-		"""
-		response = self.client.get(
-			self.endpoint.format(user_pk=5)
-		)
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(len(json_response), 0)

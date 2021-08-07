@@ -31,7 +31,7 @@ class ConcretePostViewTests(BaseViewTest):
 	def setUp(self):
 		super().setUp()
 		self.post = self.model.objects.create(
-			title='Some post', text='Some text', author=self.user
+			title='Some post', text='Some text'
 		)
 
 	def test_get(self):
@@ -56,16 +56,3 @@ class ConcretePostViewTests(BaseViewTest):
 			self.urlpattern, args=(str(self.post.pk),)
 		))
 		self.assertEqual(response.status_code, 204)
-
-
-class UserPostsViewTests(BaseViewTest):
-	"""Case of testing UserPostsView view"""
-
-	urlpattern = 'user_posts'
-
-	def test_get(self):
-		"""Test does GET request return 200 response"""
-		response = self.client.get(
-			reverse(self.urlpattern, args=(self.user.pk,))
-		)
-		self.assertEqual(response.status_code, 200)

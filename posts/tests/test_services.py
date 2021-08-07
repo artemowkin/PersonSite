@@ -19,11 +19,8 @@ class PostGetServiceTests(TestCase):
 	service = PostGetService()
 
 	def setUp(self):
-		self.user = User.objects.create_superuser(
-			username='testuser', password='testpass'
-		)
 		self.post = self.model.objects.create(
-			title='Some post', text='Some text', author=self.user
+			title='Some post', text='Some text'
 		)
 
 	def test_get_concrete_with_correct_pk(self):
@@ -46,19 +43,6 @@ class PostGetServiceTests(TestCase):
 
 		self.assertEqual(posts.count(), 1)
 		self.assertEqual(posts[0], self.post)
-
-	def test_get_user_posts(self):
-		"""Test does get_user_posts() method return correct data"""
-		posts = self.service.get_user_posts(self.user.pk)
-
-		self.assertEqual(posts.count(), 1)
-		self.assertEqual(posts[0], self.post)
-
-	def test_get_user_posts_with_random_user(self):
-		"""Test does get_user_posts() with random user return no data"""
-		posts = self.service.get_user_posts(10)
-
-		self.assertEqual(posts.count(), 0)
 
 
 class PostCreateServiceTests(TestCase):
@@ -93,7 +77,7 @@ class PostUpdateServiceTests(TestCase):
 			username='testuser', password='testpass'
 		)
 		self.post = self.model.objects.create(
-			title='Some post', text='Some text', author=self.user
+			title='Some post', text='Some text'
 		)
 		self.post_data = {'title': 'Edited post', 'text': 'Some text'}
 
@@ -109,7 +93,7 @@ class PostUpdateServiceTests(TestCase):
 		Test does update() method with incorrect user
 		raises PermissionDenied exception
 		"""
-		bad_user = User.objects.create_superuser(
+		bad_user = User.objects.create_user(
 			username='baduser', password='badpass'
 		)
 		with self.assertRaises(PermissionDenied):
@@ -127,7 +111,7 @@ class PostDeleteServiceTests(TestCase):
 			username='testuser', password='testpass'
 		)
 		self.post = self.model.objects.create(
-			title='Some post', text='Some text', author=self.user
+			title='Some post', text='Some text'
 		)
 
 	def test_delete_with_correct_user(self):
@@ -141,7 +125,7 @@ class PostDeleteServiceTests(TestCase):
 		Test does delete() method raise PermissionDenied exception
 		if user is incorrect
 		"""
-		bad_user = User.objects.create_superuser(
+		bad_user = User.objects.create_user(
 			username='baduser', password='badpass'
 		)
 		with self.assertRaises(PermissionDenied):

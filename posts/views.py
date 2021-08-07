@@ -77,15 +77,3 @@ class ConcretePostView(APIView):
 		concrete_post = self.get_service.get_concrete(pk)
 		self.delete_service.delete(concrete_post, request.user)
 		return Response(status=204)
-
-
-class UserPostsView(APIView):
-	"""View to render all user posts entries"""
-
-	service = PostGetService()
-	serializer_class = PostSerializer
-
-	def get(self, request, user_pk):
-		user_posts = self.service.get_user_posts(user_pk)
-		serializer = self.serializer_class(user_posts, many=True)
-		return Response(serializer.data)

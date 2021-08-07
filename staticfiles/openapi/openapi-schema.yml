@@ -408,30 +408,6 @@ paths:
           description: 'When user who is not a superuser tries to delete the post'
       tags:
       - posts
-  /posts/user/{user_pk}/:
-    get:
-      operationId: getUserPosts
-      description: 'Return all user posts where this user
-
-      is an author of the post'
-      parameters:
-      - name: user_pk
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Post"
-          description: ''
-      tags:
-      - posts
   /shop/products/:
     get:
       operationId: getShopProducts
@@ -625,22 +601,12 @@ components:
         preview:
           type: string
           example: "/media/posts_previews/preview.png"
-        author:
-          type: object
-          readOnly: true
-          properties:
-            pk:
-              type: integer
-              readOnly: true
-            username:
-              type: string
-              readOnly: true
-              pattern: ^[\w.@+-]+\z
-              maxLength: 150
-            email:
-              type: string
-              format: email
-              readOnly: true
+        pub_date:
+          type: string
+          format: date
+      required:
+      - title
+      - text
     Product:
       type: object
       properties:

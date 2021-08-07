@@ -13,9 +13,6 @@ class Post(models.Model):
 	title = models.CharField('post title', max_length=255, unique=True)
 	text = models.TextField('post text')
 	preview = models.ImageField('post image', upload_to='posts_previews')
-	author = models.ForeignKey(
-		User, on_delete=models.CASCADE, verbose_name='Post author'
-	)
 	pub_date = models.DateField('post publication date', auto_now_add=True)
 
 	class Meta:

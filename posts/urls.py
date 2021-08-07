@@ -10,8 +10,4 @@ urlpatterns = [
 		'<uuid:pk>/set_preview/',
 		views.PostPreviewUploadView.as_view(), name='post_preview_view'
 	),
-	path(
-		'user/<int:user_pk>/',
-		views.UserPostsView.as_view(), name='user_posts'
-	),
 ]
