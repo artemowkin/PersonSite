@@ -1,51 +1,36 @@
 import simplejson as json
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from shop.models import Product
+from .base import AllEndpointMixin, ConcreteEndpointMixin
 
 
-User = get_user_model()
+def _product_setup(testcase):
+	testcase.entry = testcase.model.objects.create(
+		title='Some product', short_description='Some short description',
+		description='Some description', price='100.00', amount=500,
+	)
+	testcase.serialized_entry = {
+		'pk': str(testcase.entry.pk), 'image': None,
+		'title': 'Some product',
+		'short_description': 'Some short description',
+		'description': 'Some description', 'price': '100.00',
+		'amount': 500, 'available': True
+	}
 
 
-class BaseProductsFunctionalTest(TestCase):
-	"""Base functional test for products endpoints"""
-
-	model = Product
-
-	def setUp(self):
-		self.user = User.objects.create_superuser(
-			username='testuser', password='testpass',
-			email='example@gmail.com'
-		)
-		self.client.login(username='testuser', password='testpass')
-		self.product = Product.objects.create(
-			title='Some product', short_description='Some short description',
-			description='Some description', price='100.00', amount=500,
-		)
-		self.serialized_product = {
-			'pk': str(self.product.pk), 'image': None,
-			'title': 'Some product',
-			'short_description': 'Some short description',
-			'description': 'Some description', 'price': '100.00',
-			'amount': 500, 'available': True
-		}
-
-
-class AllProductsEndpointFunctionalTests(BaseProductsFunctionalTest):
+class AllProductsEndpointFunctionalTests(AllEndpointMixin, TestCase):
 	"""Functional test for /shop/products/ endpoint"""
 
 	endpoint = '/shop/products/'
+	model = Product
 
-	def test_get_all_products(self):
-		response = self.client.get(self.endpoint)
-		json_response = json.loads(response.content)
+	def setUp(self):
+		super().setUp()
+		_product_setup(self)
 
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, [self.serialized_product])
-
-	def _request_create_a_new_product(self):
+	def request_create_a_new_entry(self):
 		"""Send POST request on /shop/products/"""
 		return self.client.post(self.endpoint, {
 			'title': 'New product',
@@ -54,12 +39,7 @@ class AllProductsEndpointFunctionalTests(BaseProductsFunctionalTest):
 			'amount': 100
 		}, content_type='application/json')
 
-	def test_create_a_new_product(self):
-		response = self._request_create_a_new_product()
-		json_response = json.loads(response.content)
-		products_count = self.model.objects.count()
-
-		self.assertEqual(response.status_code, 201)
+	def check_created_entry_fields(self, json_response):
 		self.assertIn('pk', json_response)
 		self.assertEqual(json_response['title'], 'New product')
 		self.assertEqual(
@@ -68,40 +48,46 @@ class AllProductsEndpointFunctionalTests(BaseProductsFunctionalTest):
 		self.assertEqual(json_response['description'], 'New description')
 		self.assertEqual(json_response['price'], '200.00')
 		self.assertEqual(json_response['amount'], 100)
-		self.assertEqual(products_count, 2)
 
-	def test_create_a_new_product_with_not_superuser(self):
+	def test_create_a_new_product_with_existing_title(self):
 		"""
-		Test does POST on /shop/products/ with not a superuser
-		return 403 response
+		Test POST request on /shop/products/ endpoint with an
+		existing title
 		"""
-		new_user = User.objects.create_user(
-			username='justuser', password='pass'
-		)
-		self.client.login(username='justuser', password='pass')
-		response = self._request_create_a_new_product()
+		response =  self.client.post(self.endpoint, {
+			'title': 'Some product',
+			'short_description': 'New short description',
+			'description': 'New description', 'price': '200.00',
+			'amount': 100
+		}, content_type='application/json')
+		json_response = json.loads(response.content)
 
-		self.assertEqual(response.status_code, 403)
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'title': ['product with this product title already exists.']
+		})
 
 
-class ConcreteProductEndpointFunctionalTests(BaseProductsFunctionalTest):
+class ConcreteProductEndpointFunctionalTests(ConcreteEndpointMixin, TestCase):
 	"""Functional tests for /shop/products/{product_pk}/ endpoint"""
 
 	endpoint = '/shop/products/{product_pk}/'
+	model = Product
 
-	def test_get_a_concrete_product(self):
-		response = self.client.get(
-			self.endpoint.format(product_pk=self.product.pk)
+	def setUp(self):
+		super().setUp()
+		_product_setup(self)
+		self.updated_serialized_entry = self.serialized_entry.copy()
+		self.updated_serialized_entry['title'] = 'New title'
+
+	def get_request(self):
+		return self.client.get(
+			self.endpoint.format(product_pk=self.entry.pk)
 		)
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, self.serialized_product)
 
 	def put_request(self):
-		"""Request PUT on /shop/products/{product_pk}/ endpoint"""
 		return self.client.put(
-			self.endpoint.format(product_pk=self.product.pk), {
+			self.endpoint.format(product_pk=self.entry.pk), {
 				'title': 'New title',
 				'short_description': 'Some short description',
 				'description': 'Some description', 'price': '100.00',
@@ -109,35 +95,7 @@ class ConcreteProductEndpointFunctionalTests(BaseProductsFunctionalTest):
 			}, content_type='application/json'
 		)
 
-	def bad_login(self):
-		"""Login the bad user"""
-		bad_user = User.objects.create_user(
-			username='baduser', password='badpass'
+	def delete_request(self):
+		return self.client.delete(
+			self.endpoint.format(product_pk=self.entry.pk)
 		)
-		self.client.login(username='baduser', password='badpass')
-
-	def test_update_a_concrete_product(self):
-		"""
-		Test PUT request on /shop/products/{product_pk}/ endpoint with
-		correct user
-		"""
-		response = self.put_request()
-		json_response = json.loads(response.content)
-		self.serialized_product['title'] = 'New title'
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, self.serialized_product)
-
-	def test_update_a_concrete_product_with_bad_user(self):
-		"""
-		Test PUT request on /shop/products/{product_pk}/ endpoint with
-		incorrect user
-		"""
-		self.bad_login()
-		response = self.put_request()
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 403)
-		self.assertEqual(json_response, {
-			'detail': 'You do not have permission to perform this action.'
-		})

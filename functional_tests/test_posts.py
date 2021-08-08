@@ -1,74 +1,42 @@
 import simplejson as json
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from posts.models import Post
+from .base import AllEndpointMixin, ConcreteEndpointMixin
 
 
-User = get_user_model()
+def _post_setup(testcase):
+	testcase.entry = testcase.model.objects.create(
+		title='Post title', text='Post text'
+	)
+	testcase.serialized_entry = {
+		'pk': str(testcase.entry.pk), 'title': 'Post title',
+		'text': 'Post text', 'preview': None,
+		'pub_date': str(testcase.entry.pub_date)
+	}
 
 
-class BasePostFunctionalTest(TestCase):
-	"""Base functional test for posts endpoints"""
-
-	model = Post
-
-	def setUp(self):
-		self.user = User.objects.create_superuser(
-			username='testuser', password='testpass',
-			email='testuser@gmail.com'
-		)
-		self.client.login(username='testuser', password='testpass')
-		self.post = self.model.objects.create(
-			title='Post title', text='Post text'
-		)
-		self.serialized_post = {
-			'pk': str(self.post.pk), 'title': 'Post title',
-			'text': 'Post text', 'preview': None,
-			'pub_date': str(self.post.pub_date)
-		}
-
-
-class AllPostsEndpointFunctionalTests(BasePostFunctionalTest):
+class AllPostsEndpointFunctionalTests(AllEndpointMixin, TestCase):
 	"""Functional tests for /posts/ endpoint"""
 
 	endpoint = '/posts/'
+	model = Post
 
-	def test_get_all_posts(self):
-		"""Test GET request on /posts/ endpoint"""
-		response = self.client.get(self.endpoint)
-		json_response = json.loads(response.content)
+	def setUp(self):
+		super().setUp()
+		_post_setup(self)
 
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, [self.serialized_post])
-
-	def test_create_a_new_post(self):
+	def request_create_a_new_entry(self):
 		"""Test POST request on /posts/ endpoint"""
-		response = self.client.post(self.endpoint, {
+		return self.client.post(self.endpoint, {
 			'title': 'New post', 'text': 'New post text'
 		}, content_type='application/json')
-		json_response = json.loads(response.content)
-		posts_entries_count = self.model.objects.count()
 
-		self.assertEqual(response.status_code, 201)
+	def check_created_entry_fields(self, json_response):
 		self.assertIn('pk', json_response)
 		self.assertIn('title', json_response)
 		self.assertIn('text', json_response)
-		self.assertEqual(posts_entries_count, 2)
-
-	def test_create_a_new_post_with_incorrect_data(self):
-		"""Test POST request on /posts/ endpoint with incorrect data"""
-		response = self.client.post(self.endpoint, {
-			'incorrect': 'data'
-		}, content_type='application/json')
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 400)
-		self.assertEqual(json_response, {
-			'title': ['This field is required.'],
-			'text': ['This field is required.']
-		})
 
 	def test_create_a_new_post_with_existing_title(self):
 		"""Test POST request on /posts/ endpoint with an existing title"""
@@ -83,106 +51,30 @@ class AllPostsEndpointFunctionalTests(BasePostFunctionalTest):
 		})
 
 
-class ConcretePostEndpointFunctionalTests(BasePostFunctionalTest):
+class ConcretePostEndpointFunctionalTests(ConcreteEndpointMixin, TestCase):
 	"""Functional tests for /posts/{post_pk}/ endpoint"""
 
 	endpoint = '/posts/{post_pk}/'
+	model = Post
+	def setUp(self):
+		super().setUp()
+		_post_setup(self)
+		self.updated_serialized_entry = self.serialized_entry.copy()
+		self.updated_serialized_entry['title'] = 'New title'
 
-	def test_get_a_concrete_post(self):
-		"""Test GET request on /posts/{post_pk}/ endpoint"""
-		response = self.client.get(
-			self.endpoint.format(post_pk=self.post.pk)
+	def get_request(self):
+		return self.client.get(
+			self.endpoint.format(post_pk=self.entry.pk)
 		)
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, self.serialized_post)
 
 	def put_request(self):
-		"""Request PUT on /posts/{post_pk}/ endpoint"""
 		return self.client.put(
-			self.endpoint.format(post_pk=self.post.pk), {
-				'title': 'Edited title', 'text': 'Edited text'
+			self.endpoint.format(post_pk=self.entry.pk), {
+				'title': 'New title', 'text': 'Post text'
 			}, content_type='application/json'
 		)
-
-	def bad_login(self):
-		"""Login the bad user"""
-		bad_user = User.objects.create_user(
-			username='baduser', password='badpass'
-		)
-		self.client.login(username='baduser', password='badpass')
-
-	def test_update_a_concrete_post(self):
-		"""
-		Test PUT request on /posts/{post_pk}/ endpoint with
-		correct user
-		"""
-		response = self.put_request()
-		json_response = json.loads(response.content)
-		self.serialized_post['title'] = 'Edited title'
-		self.serialized_post['text'] = 'Edited text'
-
-		self.assertEqual(response.status_code, 200)
-		self.assertEqual(json_response, self.serialized_post)
-
-	def test_update_a_concrete_post_with_bad_user(self):
-		"""
-		Test PUT request on /posts/{post_pk}/ endpoint with
-		incorrect user
-		"""
-		self.bad_login()
-		response = self.put_request()
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 403)
-		self.assertEqual(json_response, {
-			'detail': 'You do not have permission to perform this action.'
-		})
-
-	def test_update_a_concrete_post_with_incorrect_data(self):
-		"""
-		Test POST request on /posts/{post_pk}/ endpoint with
-		incorrect data
-		"""
-		response = self.client.put(
-			self.endpoint.format(post_pk=self.post.pk), {
-				'incorrect': 'data'
-			}, content_type='application/json'
-		)
-		json_response = json.loads(response.content)
-
-		self.assertEqual(response.status_code, 400)
-		self.assertEqual(json_response, {
-			'title': ['This field is required.'],
-			'text': ['This field is required.']
-		})
 
 	def delete_request(self):
-		"""Request DELETE on /posts/{post_pk}/ endpoint"""
 		return self.client.delete(
-			self.endpoint.format(post_pk=self.post.pk)
+			self.endpoint.format(post_pk=self.entry.pk)
 		)
-
-	def test_delete_a_concrete_post(self):
-		"""
-		Test DELETE request on /posts/{post_pk}/ endpoint with
-		correct user
-		"""
-		response = self.delete_request()
-		posts_entries_count = Post.objects.count()
-
-		self.assertEqual(response.status_code, 204)
-		self.assertEqual(posts_entries_count, 0)
-
-	def test_delete_a_concrete_post_with_bad_user(self):
-		"""
-		Test DELETE request on /posts/{post_pk}/ endpoint with
-		incorrect user
-		"""
-		self.bad_login()
-		response = self.delete_request()
-		posts_entries_count = Post.objects.count()
-
-		self.assertEqual(response.status_code, 403)
-		self.assertEqual(posts_entries_count, 1)
