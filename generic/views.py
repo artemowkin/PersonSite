@@ -96,3 +96,34 @@ class BaseConcreteView(APIView):
 		concrete_entry = self.get_service.get_concrete(pk)
 		self.delete_service.delete(concrete_entry, request.user)
 		return Response(status=204)
+
+
+class BaseUploadImageView(APIView):
+	"""Base view to upload images for entries"""
+
+	get_service = None
+	update_service = None
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		if not self.get_service:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`get_service` attribute"
+			)
+		if not self.update_service:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`update_service` attribute"
+			)
+
+	def put(self, request, pk):
+		file_obj = request.data.get('file')
+		if not file_obj:
+			return Response(
+				{"error": "You need to send the file"}, status=400
+			)
+
+		entry = self.get_service.get_concrete(pk)
+		self.update_service.update_image(entry, file_obj)
+		return Response(status=204)

@@ -1,3 +1,5 @@
+from typing import TextIO
+
 from django.db.models import QuerySet
 
 from generic.services import (
@@ -38,6 +40,11 @@ class ProductUpdateService(BaseUpdateService):
 		entry.price = data['price']
 		entry.amount = data['amount']
 		entry.available = data.get('available') or entry.available
+
+	def update_image(self, product: Product, file_obj: TextIO):
+		"""Set the image field for product"""
+		product.image = file_obj
+		product.save()
 
 
 class ProductDeleteService(BaseDeleteService):

@@ -9,4 +9,8 @@ urlpatterns = [
 		'<uuid:pk>/', views.ConcreteProductView.as_view(),
 		name='concrete_product'
 	),
+	path(
+		'<uuid:pk>/set_image/', views.ProductImageUploadView.as_view(),
+		name='product_image_view'
+	),
 ]

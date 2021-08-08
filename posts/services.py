@@ -37,7 +37,7 @@ class PostUpdateService(BaseUpdateService):
 		entry.title = data['title']
 		entry.text = data['text']
 
-	def update_preview(self, post: Post, file_obj: TextIO) -> None:
+	def update_image(self, post: Post, file_obj: TextIO) -> None:
 		post.preview = file_obj
 		post.save()
 

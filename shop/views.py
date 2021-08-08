@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from generic.views import BaseAllCreateView, BaseConcreteView
+from generic.views import (
+	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
+)
 from .services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService
@@ -24,3 +26,9 @@ class ConcreteProductView(BaseConcreteView):
 	update_service = ProductUpdateService()
 	delete_service = ProductDeleteService()
 	serializer_class = ProductSerializer
+
+class ProductImageUploadView(BaseUploadImageView):
+	"""View to upload image for product entry"""
+
+	get_service = ProductsGetService()
+	update_service = ProductUpdateService()
