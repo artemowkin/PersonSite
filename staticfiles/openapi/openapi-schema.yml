@@ -625,6 +625,32 @@ paths:
           description: 'When user who is not a superuser tries to create the product.'
       tags:
       - shop
+    delete:
+      operationId: deleteConcreteShopProduct
+      description: Delete a concrete shop product
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not a superuser tries to delete the product'
+      tags:
+      - shop
 components:
   schemas:
     UserDetails:
