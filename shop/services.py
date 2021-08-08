@@ -1,15 +1,11 @@
-from django.db.models import QuerySet, Model
-from django.contrib.auth import get_user_model
+from django.db.models import QuerySet
 
 from generic.services import (
 	BaseGetEntryService, BaseModelService, BaseCreateService,
-	BaseUpdateService
+	BaseUpdateService, BaseDeleteService
 )
 from generic.strategies import CheckIsUserAdminStrategy
 from .models import Product
-
-
-User = get_user_model()
 
 
 class ProductsGetService(BaseGetEntryService):
@@ -42,3 +38,9 @@ class ProductUpdateService(BaseUpdateService):
 		entry.price = data['price']
 		entry.amount = data['amount']
 		entry.available = data.get('available') or entry.available
+
+
+class ProductDeleteService(BaseDeleteService):
+	"""Service to delete a concrete product entry"""
+
+	check_user_strategy = CheckIsUserAdminStrategy()

@@ -42,3 +42,57 @@ class BaseAllCreateView(APIView):
 			return Response(serializer_data, status=201)
 
 		return Response(serializer.errors, status=400)
+
+
+class BaseConcreteView(APIView):
+	"""Base view to render a concrete entry, update it, and delete it"""
+
+	get_service = None
+	update_service = None
+	delete_service = None
+	serializer_class = None
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		if not self.get_service:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`get_service` attribute"
+			)
+		if not self.update_service:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`update_service` attribute"
+			)
+		if not self.delete_service:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`delete_service` attribute"
+			)
+		if not self.serializer_class:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`serializer_class` attribute"
+			)
+
+	def get(self, request, pk):
+		concrete_entry = self.get_service.get_concrete(pk)
+		serializer = self.serializer_class(concrete_entry)
+		return Response(serializer.data)
+
+	def put(self, request, pk):
+		serializer = self.serializer_class(data=request.data)
+		if serializer.is_valid():
+			concrete_entry = self.get_service.get_concrete(pk)
+			changed_entry = self.update_service.update(
+				concrete_entry, serializer.data, request.user
+			)
+			serialized_entry = self.serializer_class(changed_entry)
+			return Response(serialized_entry.data, status=200)
+
+		return Response(serializer.errors, status=400)
+
+	def delete(self, request, pk):
+		concrete_entry = self.get_service.get_concrete(pk)
+		self.delete_service.delete(concrete_entry, request.user)
+		return Response(status=204)

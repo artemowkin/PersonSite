@@ -1,19 +1,14 @@
 from typing import TextIO
 
-from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 
 from generic.services import (
-	BaseGetEntryService, BaseModelService, check_is_user_superuser,
-	BaseCreateService, BaseUpdateService
+	BaseGetEntryService, BaseModelService, BaseCreateService,
+	BaseUpdateService, BaseDeleteService
 )
 from generic.strategies import CheckIsUserAdminStrategy
 
 from .models import Post
-
-
-User = get_user_model()
 
 
 class PostGetService(BaseGetEntryService):
@@ -47,9 +42,7 @@ class PostUpdateService(BaseUpdateService):
 		post.save()
 
 
-class PostDeleteService:
+class PostDeleteService(BaseDeleteService):
 	"""Service to delete a concrete post entry"""
 
-	def delete(self, post: Post, user: User) -> None:
-		check_is_user_superuser(user)
-		post.delete()
+	check_user_strategy = CheckIsUserAdminStrategy()

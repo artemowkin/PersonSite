@@ -5,15 +5,10 @@ from django.db.models import Model, QuerySet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from .strategies import CheckUserStrategy, CheckIsUserAdminStrategy
+from .strategies import CheckUserStrategy
 
 
 User = get_user_model
-
-
-def check_is_user_superuser(user: User):
-	if not user.is_superuser:
-		raise PermissionDenied
 
 
 class BaseModelService:
@@ -66,3 +61,13 @@ class BaseUpdateService:
 		self.set_entry_fields(entry, data)
 		entry.save()
 		return entry
+
+
+class BaseDeleteService:
+	"""Base service to delete the concrete entry"""
+
+	check_user_strategy = CheckUserStrategy()
+
+	def delete(self, entry: Model, user: User) -> None:
+		self.check_user_strategy.check_user(user)
+		entry.delete()
