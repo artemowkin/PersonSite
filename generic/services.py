@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from .strategies import CheckUserStrategy
 
 
-User = get_user_model
+User = get_user_model()
 
 
 class BaseModelService:
