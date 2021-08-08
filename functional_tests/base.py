@@ -1,7 +1,6 @@
 import simplejson as json
 
 from django.test import TestCase
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth import get_user_model
 
 
