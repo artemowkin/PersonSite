@@ -45,13 +45,9 @@ class BaseCreateService(BaseModelService):
 
 	check_user_strategy = CheckUserStrategy()
 
-	def check_user(self, user: User):
-		"""User authorization"""
-		return self.check_user_strategy.check_user(user)
-
 	def create(self, data: dict, user: User) -> Model:
 		"""Create a new entry using data"""
-		self.check_user(user)
+		self.check_user_strategy.check_user(user)
 		return self.model.objects.create(**data)
 
 
@@ -60,17 +56,13 @@ class BaseUpdateService:
 
 	check_user_strategy = CheckUserStrategy()
 
-	def check_user(self, user: User):
-		"""User authorization"""
-		return self.check_user_strategy.check_user(user)
-
 	def set_entry_fields(self, entry: Model, data: dict) -> None:
 		"""Set fields for entry using data"""
-		pass
+		raise NotImplementedError
 
 	def update(self, entry: Model, data: dict, user: User) -> Model:
 		"""Update the model entry using data"""
-		self.check_user(user)
+		self.check_user_strategy.check_user(user)
 		self.set_entry_fields(entry, data)
 		entry.save()
 		return entry
