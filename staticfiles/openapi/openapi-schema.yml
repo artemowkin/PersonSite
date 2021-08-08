@@ -528,6 +528,49 @@ paths:
           description: 'When user who is not a superuser tries to create the product.'
       tags:
         - shop
+  /shop/products/{product_pk}/set_image/:
+    put:
+      operationId: uploadShopProductImage
+      description: 'Upload or change the product image. JS guide:
+
+      https://muffinman.io/blog/uploading-files-using-fetch-multipart-form-data/'
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema: {}
+      responses:
+        '204':
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You need to send the file"
+          description: When file has not be sending
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not a superuser tries to update the product image'
+      tags:
+      - shop
   /shop/products/{product_pk}/:
     get:
       operationId: getConcreteShopProduct
