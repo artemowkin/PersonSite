@@ -40,7 +40,7 @@ class ProductReview(models.Model):
 	uuid = models.UUIDField(primary_key=True, editable=False, default=uuid4)
 	text = models.TextField('Review text')
 	rating = models.PositiveIntegerField(
-		'Review rating', default=1, validators=(
+		'Review rating', validators=(
 			MaxValueValidator(5),
 		)
 	)

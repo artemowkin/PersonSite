@@ -694,6 +694,35 @@ paths:
           description: 'When user who is not a superuser tries to delete the product'
       tags:
       - shop
+  /shop/products/{product_pk}/reviews/:
+    get:
+      operationId: getShopProductReviews
+      description: Return all product reviews
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overall_rating:
+                    type: number
+                    format: double
+                    example: 5.0
+                  reviews:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProductReview"
+      tags:
+        - shop
 components:
   schemas:
     UserDetails:
@@ -813,3 +842,33 @@ components:
       - description
       - price
       - amount
+    ProductReview:
+      type: object
+      properties:
+        pk:
+          type: string
+          readOnly: true
+          format: uuid
+          pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+          minLength: 36
+          maxLength: 36
+        text:
+          type: string
+          minLength: 1
+        rating:
+          type: integer
+          example: 5
+        author:
+          type: integer
+          example: 1
+          readOnly: true
+        product:
+          type: string
+          readOnly: true
+          format: uuid
+          pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+          minLength: 36
+          maxLength: 36
+      required:
+      - text
+      - rating
