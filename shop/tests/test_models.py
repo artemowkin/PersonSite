@@ -3,6 +3,7 @@ from uuid import UUID
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 from ..models import Product, ProductReview
 
@@ -66,6 +67,19 @@ class ProductReviewModelTests(TestCase):
 			text='Review text', rating=5, author=self.user,
 			product=self.product
 		)
+		self.review.clean()
+
+	def test_review_rating_min_value(self):
+		"""Test does review.rating minimum value equal 1"""
+		with self.assertRaises(ValidationError):
+			self.review.rating = 0
+			self.review.full_clean()
+
+	def test_review_rating_max_value(self):
+		"""Test does review.rating maximum value equal 5"""
+		with self.assertRaises(ValidationError):
+			self.review.rating = 6
+			self.review.full_clean()
 
 	def test_model_entry_fields(self):
 		"""Test are created model entry's fields valid"""

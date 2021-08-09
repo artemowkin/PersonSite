@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 from django.urls import reverse
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 
 
@@ -40,9 +40,10 @@ class ProductReview(models.Model):
 	uuid = models.UUIDField(primary_key=True, editable=False, default=uuid4)
 	text = models.TextField('Review text')
 	rating = models.PositiveIntegerField(
-		'Review rating', validators=(
+		'Review rating', validators=[
 			MaxValueValidator(5),
-		)
+			MinValueValidator(1)
+		]
 	)
 	pub_date = models.DateField(auto_now_add=True)
 	author = models.ForeignKey(
