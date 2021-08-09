@@ -13,4 +13,8 @@ urlpatterns = [
 		'<uuid:pk>/set_image/', views.ProductImageUploadView.as_view(),
 		name='product_image_view'
 	),
+	path(
+		'<uuid:pk>/reviews/', views.AllProductReviewsView.as_view(),
+		name='all_product_reviews'
+	),
 ]

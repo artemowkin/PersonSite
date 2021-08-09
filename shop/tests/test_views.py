@@ -1,7 +1,10 @@
 from django.test import TestCase
+from django.urls import reverse
 
-from generic.unit_tests import AllCreateViewMixin, ConcreteViewMixin
-from ..models import Product
+from generic.unit_tests import (
+	AllCreateViewMixin, ConcreteViewMixin, BaseViewMixin
+)
+from ..models import Product, ProductReview
 
 
 class AllCreateProductsViewTests(AllCreateViewMixin, TestCase):
@@ -37,3 +40,28 @@ class ConcreteProductViewTests(ConcreteViewMixin, TestCase):
 			'description': 'New description', 'price': '200.00',
 			'amount': 100
 		}
+
+
+class AllProductReviewsViewTests(BaseViewMixin, TestCase):
+	"""Case of testing AllProductReviewsView"""
+
+	urlpattern = 'all_product_reviews'
+	product_model = Product
+	review_model = ProductReview
+
+	def setUp(self):
+		super().setUp()
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+
+	def test_get(self):
+		response = self.client.get(
+			reverse(self.urlpattern, args=[str(self.product.pk)])
+		)
+		self.assertEqual(response.status_code, 200)

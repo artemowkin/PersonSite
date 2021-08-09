@@ -1,9 +1,10 @@
+import datetime
 import simplejson as json
 
 from django.test import TestCase
 
-from shop.models import Product
-from .base import AllEndpointMixin, ConcreteEndpointMixin
+from shop.models import Product, ProductReview
+from .base import AllEndpointMixin, ConcreteEndpointMixin, BaseEndpointMixin
 
 
 def _product_setup(testcase):
@@ -99,3 +100,38 @@ class ConcreteProductEndpointFunctionalTests(ConcreteEndpointMixin, TestCase):
 		return self.client.delete(
 			self.endpoint.format(product_pk=self.entry.pk)
 		)
+
+
+class AllProductReviewsEndpointFunctionalTests(BaseEndpointMixin, TestCase):
+	"""Case of testing /shop/products/{product_pk}/reviews/ endpoint"""
+
+	endpoint = '/shop/products/{product_pk}/reviews/'
+	product_model = Product
+	review_model = ProductReview
+
+	def setUp(self):
+		super().setUp()
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+		self.serialized_review = {
+			'pk': str(self.review.pk), 'text': 'Review text', 'rating': 5,
+			'author': self.user.pk, 'product': str(self.product.pk),
+			'pub_date': str(datetime.date.today())
+		}
+
+	def test_get_all_product_reviews(self):
+		response = self.client.get(
+			self.endpoint.format(product_pk=str(self.product.pk))
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, {
+			'overall_rating': 5.0, 'reviews': [self.serialized_review]
+		})

@@ -1,8 +1,13 @@
 from uuid import UUID
 
 from django.test import TestCase
+from django.urls import reverse
+from django.contrib.auth import get_user_model
 
-from ..models import Product
+from ..models import Product, ProductReview
+
+
+User = get_user_model()
 
 
 class ProductModelTests(TestCase):
@@ -34,6 +39,52 @@ class ProductModelTests(TestCase):
 		string_entry = str(self.product)
 
 		self.assertEqual(string_entry, self.product.title)
+
+	def test_absolute_url(self):
+		"""Test does get_absolute_url() return a valid url"""
+		self.assertEqual(
+			self.product.get_absolute_url(),
+			reverse('concrete_product', args=[str(self.product.pk)])
+		)
+
+
+class ProductReviewModelTests(TestCase):
+	"""Case of testing ProductReview model"""
+
+	product_model = Product
+	review_model = ProductReview
+
+	def setUp(self):
+		self.user = User.objects.create_superuser(
+			username='testuser', password='testpass'
+		)
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+
+	def test_model_entry_fields(self):
+		"""Test are created model entry's fields valid"""
+		self.assertIsInstance(self.review.pk, UUID)
+		self.assertEqual(self.review.text, 'Review text')
+		self.assertEqual(self.review.rating, 5)
+		self.assertEqual(self.review.author, self.user)
+		self.assertEqual(self.review.product, self.product)
+
+	def test_string_representation(self):
+		"""Test is created model entry's string representation valid"""
+		string_review = str(self.review)
+
+		self.assertEqual(
+			string_review, (
+				f"{self.review.product.title} review "
+				f"from {self.review.author.username}"
+			)
+		)
 
 	def test_absolute_url(self):
 		"""Test does get_absolute_url() return a valid url"""

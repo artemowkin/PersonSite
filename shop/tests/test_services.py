@@ -7,10 +7,10 @@ from generic.unit_tests import (
 	GetServiceMixin, CreateServiceMixin, UpdateServiceMixin,
 	DeleteServiceMixin
 )
-from ..models import Product
+from ..models import Product, ProductReview
 from ..services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
-	ProductDeleteService
+	ProductDeleteService, ProductReviewsGetService
 )
 
 
@@ -123,3 +123,32 @@ class ProductDeleteServiceTests(DeleteServiceMixin, TestCase):
 			title='Some product', short_description='Some short description',
 			description='Some description', price='100.00', amount=500,
 		)
+
+
+class ProductReviewsGetServiceTests(TestCase):
+	"""Case of testing ProductReviewsGetService"""
+
+	product_model = Product
+	review_model = ProductReview
+	service_class = ProductReviewsGetService
+
+	def setUp(self):
+		self.user = User.objects.create_superuser(
+			username='testuser', password='testpass'
+		)
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+		self.service = self.service_class(self.product)
+
+	def test_get_all(self):
+		reviews = self.service.get_all()
+
+		self.assertEqual(reviews.count(), 1)
+		self.assertEqual(reviews[0], self.review)
+		self.assertEqual(reviews[0].product, self.product)
