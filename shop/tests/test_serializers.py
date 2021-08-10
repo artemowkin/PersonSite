@@ -56,3 +56,15 @@ class ProductReviewSerializerTests(TestCase):
 		serializer = self.serializer_class(data=self.serialized_product_review)
 
 		self.assertTrue(serializer.is_valid())
+
+	def test_serializer_rating_min_value(self):
+		self.serialized_product_review['rating'] = 0
+		serializer = self.serializer_class(data=self.serialized_product_review)
+
+		self.assertFalse(serializer.is_valid())
+
+	def test_serializer_rating_max_value(self):
+		self.serialized_product_review['rating'] = 6
+		serializer = self.serializer_class(data=self.serialized_product_review)
+
+		self.assertFalse(serializer.is_valid())
