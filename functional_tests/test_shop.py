@@ -21,6 +21,22 @@ def _product_setup(testcase):
 	}
 
 
+def _product_review_setup(testcase):
+	testcase.product = testcase.product_model.objects.create(
+		title='Some product', short_description='Some short description',
+		description='Some description', price='100.00', amount=500,
+	)
+	testcase.review = testcase.review_model.objects.create(
+		text='Review text', rating=5, author=testcase.user,
+		product=testcase.product
+	)
+	testcase.serialized_review = {
+		'pk': str(testcase.review.pk), 'text': 'Review text', 'rating': 5,
+		'author': testcase.user.pk, 'product': str(testcase.product.pk),
+		'pub_date': str(datetime.date.today())
+	}
+
+
 class AllProductsEndpointFunctionalTests(AllEndpointMixin, TestCase):
 	"""Functional test for /shop/products/ endpoint"""
 
@@ -111,19 +127,7 @@ class AllProductReviewsEndpointFunctionalTests(BaseEndpointMixin, TestCase):
 
 	def setUp(self):
 		super().setUp()
-		self.product = self.product_model.objects.create(
-			title='Some product', short_description='Some short description',
-			description='Some description', price='100.00', amount=500,
-		)
-		self.review = self.review_model.objects.create(
-			text='Review text', rating=5, author=self.user,
-			product=self.product
-		)
-		self.serialized_review = {
-			'pk': str(self.review.pk), 'text': 'Review text', 'rating': 5,
-			'author': self.user.pk, 'product': str(self.product.pk),
-			'pub_date': str(datetime.date.today())
-		}
+		_product_review_setup(self)
 
 	def test_get_all_product_reviews(self):
 		response = self.client.get(
@@ -135,3 +139,17 @@ class AllProductReviewsEndpointFunctionalTests(BaseEndpointMixin, TestCase):
 		self.assertEqual(json_response, {
 			'overall_rating': 5.0, 'reviews': [self.serialized_review]
 		})
+
+	def test_create_a_new_product_review(self):
+		response = self.client.post(
+			self.endpoint.format(product_pk=str(self.product.pk)), {
+				'text': 'New review', 'rating': 5
+			}
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 201)
+		self.assertEqual(self.product.reviews.count(), 2)
+		self.assertIn('pk', json_response)
+		self.assertEqual(json_response['text'], 'New review')
+		self.assertEqual(json_response['rating'], 5)
