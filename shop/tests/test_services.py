@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
+from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
 
 from generic.unit_tests import (
@@ -10,7 +11,7 @@ from generic.unit_tests import (
 from ..models import Product, ProductReview
 from ..services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
-	ProductDeleteService, ProductReviewsGetService
+	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
 )
 
 
@@ -133,7 +134,7 @@ class ProductReviewsGetServiceTests(TestCase):
 	service_class = ProductReviewsGetService
 
 	def setUp(self):
-		self.user = User.objects.create_superuser(
+		self.user = User.objects.create_user(
 			username='testuser', password='testpass'
 		)
 		self.product = self.product_model.objects.create(
@@ -152,3 +153,50 @@ class ProductReviewsGetServiceTests(TestCase):
 		self.assertEqual(reviews.count(), 1)
 		self.assertEqual(reviews[0], self.review)
 		self.assertEqual(reviews[0].product, self.product)
+
+
+class ProductReviewCreateServiceTests(TestCase):
+	"""Case of testing ProductReviewCreateService"""
+
+	product_model = Product
+	review_model = ProductReview
+	service_class = ProductReviewCreateService
+
+	def setUp(self):
+		self.user = User.objects.create_user(
+			username='testuser', password='testpass'
+		)
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.service = self.service_class(self.product)
+		self.review_data = {'text': 'New review', 'rating': 5}
+
+	def test_create(self):
+		"""
+		Test does create() method create a new review for product
+		from user
+		"""
+		review = self.service.create(self.review_data, self.user)
+
+		self.assertEqual(self.product.reviews.count(), 1)
+		self.assertEqual(review.text, 'New review')
+		self.assertEqual(review.rating, 5)
+		self.assertEqual(review.product, self.product)
+		self.assertEqual(review.author, self.user)
+
+	def test_create_with_not_authenticated_user(self):
+		"""
+		Test does create() requested by not authenticated
+		user raises PermissionDenied error
+		"""
+		anon = AnonymousUser()
+		with self.assertRaises(PermissionDenied):
+			self.service.create(self.review_data, anon)
+
+	def test_create_with_incorrect_data(self):
+		"""Test does create() with incorrect data raises ValidationError"""
+		self.review_data['rating'] = 6
+		with self.assertRaises(ValidationError):
+			self.service.create(self.review_data, self.user)

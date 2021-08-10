@@ -2,9 +2,13 @@ import datetime
 import simplejson as json
 
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 
 from shop.models import Product, ProductReview
 from .base import AllEndpointMixin, ConcreteEndpointMixin, BaseEndpointMixin
+
+
+User = get_user_model()
 
 
 def _product_setup(testcase):
@@ -22,6 +26,9 @@ def _product_setup(testcase):
 
 
 def _product_review_setup(testcase):
+	testcase.user = User.objects.create_user(
+		username='testuser', password='testpass'
+	)
 	testcase.product = testcase.product_model.objects.create(
 		title='Some product', short_description='Some short description',
 		description='Some description', price='100.00', amount=500,
@@ -118,7 +125,7 @@ class ConcreteProductEndpointFunctionalTests(ConcreteEndpointMixin, TestCase):
 		)
 
 
-class AllProductReviewsEndpointFunctionalTests(BaseEndpointMixin, TestCase):
+class AllProductReviewsEndpointFunctionalTests(TestCase):
 	"""Case of testing /shop/products/{product_pk}/reviews/ endpoint"""
 
 	endpoint = '/shop/products/{product_pk}/reviews/'
@@ -126,7 +133,6 @@ class AllProductReviewsEndpointFunctionalTests(BaseEndpointMixin, TestCase):
 	review_model = ProductReview
 
 	def setUp(self):
-		super().setUp()
 		_product_review_setup(self)
 
 	def test_get_all_product_reviews(self):

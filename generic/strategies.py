@@ -20,3 +20,12 @@ class CheckIsUserAdminStrategy:
 		"""Check is user admin"""
 		if not user.is_superuser:
 			raise PermissionDenied
+
+
+class CheckIsUserAuthenticatedStrategy:
+	"""Strategy with logic to check is user authenticated"""
+
+	def check_user(self, user: User):
+		"""Check is user authenticated"""
+		if not user.is_authenticated:
+			raise PermissionDenied
