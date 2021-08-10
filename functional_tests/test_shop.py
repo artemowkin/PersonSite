@@ -29,6 +29,7 @@ def _product_review_setup(testcase):
 	testcase.user = User.objects.create_user(
 		username='testuser', password='testpass'
 	)
+	testcase.client.login(username='testuser', password='testpass')
 	testcase.product = testcase.product_model.objects.create(
 		title='Some product', short_description='Some short description',
 		description='Some description', price='100.00', amount=500,

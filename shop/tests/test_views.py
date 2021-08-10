@@ -59,9 +59,17 @@ class AllProductReviewsViewTests(BaseViewMixin, TestCase):
 			text='Review text', rating=5, author=self.user,
 			product=self.product
 		)
+		self.review_data = {'text': 'New review', 'rating': 5}
 
 	def test_get(self):
 		response = self.client.get(
 			reverse(self.urlpattern, args=[str(self.product.pk)])
 		)
 		self.assertEqual(response.status_code, 200)
+
+	def test_post(self):
+		response = self.client.post(
+			reverse(self.urlpattern, args=[str(self.product.pk)]), 
+			self.review_data, content_type='application/json'
+		)
+		self.assertEqual(response.status_code, 201)
