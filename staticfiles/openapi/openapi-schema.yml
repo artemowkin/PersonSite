@@ -899,6 +899,43 @@ paths:
           description: 'When user who is not a review author or
 
           not a superuser tries to update the review'
+      tags:
+      - shop
+    delete:
+      operationId: deleteConcreteShopProductReview
+      description: Delete a concrete shop product review
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      - name: review_pk
+        in: path
+        required: true
+        description: 'ProductReview pk field'
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not a superuser or who is not
+
+          an author of review tries to delete the product'
+      tags:
+      - shop
 components:
   schemas:
     UserDetails:
