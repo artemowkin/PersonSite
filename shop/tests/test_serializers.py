@@ -46,7 +46,11 @@ class ProductReviewSerializerTests(TestCase):
 			description='Some description', price='100.00', amount=500,
 		)
 		self.serialized_product_review = {
-			'text': 'Some review', 'rating': 5, 'author': self.user.pk,
+			'text': 'Some review', 'rating': 5, 'author': {
+				'pk': self.user.pk,
+				'username': self.user.username,
+				'email': self.user.email,
+			},
 			'product': str(self.product.pk),
 			'pub_date': str(datetime.date.today())
 		}

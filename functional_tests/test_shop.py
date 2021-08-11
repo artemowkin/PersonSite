@@ -40,7 +40,11 @@ def _product_review_setup(testcase):
 	)
 	testcase.serialized_review = {
 		'pk': str(testcase.review.pk), 'text': 'Review text', 'rating': 5,
-		'author': testcase.user.pk, 'product': str(testcase.product.pk),
+		'author': {
+			'pk': testcase.user.pk,
+			'username': testcase.user.username,
+			'email': testcase.user.email,
+		}, 'product': str(testcase.product.pk),
 		'pub_date': str(datetime.date.today())
 	}
 

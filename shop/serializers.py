@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from accounts.serializers import UserSerializer
 from .models import Product, ProductReview
 
 
@@ -17,6 +18,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductReviewSerializer(serializers.ModelSerializer):
 	"""ProductReview serializer"""
+
+	author = UserSerializer(required=False)
 
 	class Meta:
 		model = ProductReview
