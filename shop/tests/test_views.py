@@ -101,3 +101,11 @@ class ConcreteProductReviewViewTests(BaseViewMixin, TestCase):
 			])
 		)
 		self.assertEqual(response.status_code, 200)
+
+	def test_put(self):
+		response = self.client.put(
+			reverse(self.urlpattern, args=[
+				str(self.product.pk), str(self.review.pk)
+			]), self.review_data, content_type="application/json"
+		)
+		self.assertEqual(response.status_code, 200)

@@ -8,7 +8,7 @@ from generic.views import (
 from .services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
-	count_overall_rating
+	ProductReviewUpdateService, count_overall_rating
 )
 from .serializers import ProductSerializer, ProductReviewSerializer
 
@@ -82,11 +82,28 @@ class ConcreteProductReviewView(BaseProductReviewView):
 
 	get_product_service = ProductsGetService()
 	get_reviews_service_class = ProductReviewsGetService
+	update_review_service = ProductReviewUpdateService()
 	serializer_class = ProductReviewSerializer
 
-	def get(self, request, product_pk, review_pk):
+	def _get_product_review(self, product_pk, review_pk):
 		product = self.get_product_service.get_concrete(product_pk)
 		get_reviews_service = self.get_reviews_service_class(product)
 		review = get_reviews_service.get_concrete(review_pk)
+		return review
+
+	def get(self, request, product_pk, review_pk):
+		review = self._get_product_review(product_pk, review_pk)
 		serialized_review = self.serializer_class(review)
 		return Response(serialized_review.data)
+
+	def put(self, request, product_pk, review_pk):
+		serializer = self.serializer_class(data=request.data)
+		if serializer.is_valid():
+			review = self._get_product_review(product_pk, review_pk)
+			updated_review = self.update_review_service.update(
+				review, serializer.data, request.user
+			)
+			serialized_review = self.serializer_class(updated_review)
+			return Response(serialized_review.data)
+
+		return Response(serializer.errors, status=400)
