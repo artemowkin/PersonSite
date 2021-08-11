@@ -199,3 +199,27 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(json_response, self.serialized_review)
+
+	def test_update_a_concrete_entry(self):
+		response = self.client.put(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			), {'text': 'Updated review', 'rating': 5},
+			content_type='application/json'
+		)
+		json_response = json.loads(response.content)
+		self.serialized_review['text'] = 'Updated review'
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, self.serialized_review)
+
+	def test_update_a_concrete_entry_with_not_authenticated_user(self):
+		self.client.logout()
+		response = self.client.put(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			), {'text': 'Updated review', 'rating': 5},
+			content_type='application/json'
+		)
+
+		self.assertEqual(response.status_code, 403)

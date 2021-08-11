@@ -12,6 +12,7 @@ from ..models import Product, ProductReview
 from ..services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
+	ProductReviewUpdateService
 )
 
 
@@ -208,3 +209,52 @@ class ProductReviewCreateServiceTests(TestCase):
 		self.review_data['rating'] = 6
 		with self.assertRaises(ValidationError):
 			self.service.create(self.review_data, self.user)
+
+
+class ProductReviewUpdateServiceTests(TestCase):
+	"""Case of testing ProductReviewCreateService"""
+
+	product_model = Product
+	review_model = ProductReview
+	service = ProductReviewUpdateService()
+
+	def setUp(self):
+		self.user = User.objects.create_user(
+			username='testuser', password='testpass'
+		)
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+		self.review_data = {'text': 'New review', 'rating': 5}
+
+	def test_update(self):
+		review = self.service.update(self.review, self.review_data, self.user)
+
+		self.assertEqual(review.text, self.review_data['text'])
+		self.assertEqual(self.product.reviews.count(), 1)
+
+	def test_update_with_simple_user_who_is_not_author(self):
+		another_user = User.objects.create_user(
+			username='anotheruser', password='testpass'
+		)
+		with self.assertRaises(PermissionDenied):
+			self.service.update(self.review, self.review_data, another_user)
+
+	def test_update_with_admin_user(self):
+		admin = User.objects.create_superuser(
+			username='admin', password='testpass'
+		)
+		review = self.service.update(self.review, self.review_data, admin)
+
+		self.assertEqual(review.text, self.review_data['text'])
+		self.assertEqual(self.product.reviews.count(), 1)
+
+	def test_update_with_incorrect_rating(self):
+		self.review_data['rating'] = 6
+		with self.assertRaises(ValidationError):
+			self.service.update(self.review, self.review_data, self.user)

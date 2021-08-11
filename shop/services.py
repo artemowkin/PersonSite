@@ -12,6 +12,7 @@ from generic.services import (
 from generic.strategies import (
 	CheckIsUserAdminStrategy, CheckIsUserAuthenticatedStrategy
 )
+from .strategies import CheckIsUserAdminOrAuthorStrategy
 from .models import Product, ProductReview
 
 
@@ -98,6 +99,21 @@ class ProductReviewCreateService(BaseProductReviewService):
 		"""Create a new product review base on data from user"""
 		self.check_user_strategy.check_user(user)
 		review = self.model(**data, author=user, product=self._product)
+		review.full_clean()
+		review.save()
+		return review
+
+
+class ProductReviewUpdateService:
+	"""Service to update a concrete product review"""
+
+	check_user_strategy = CheckIsUserAdminOrAuthorStrategy()
+
+	def update(self, review: ProductReview, data: dict, user: User):
+		"""Update the review using data"""
+		self.check_user_strategy.check_entry_user(user, review)
+		review.text = data['text']
+		review.rating = data['rating']
 		review.full_clean()
 		review.save()
 		return review
