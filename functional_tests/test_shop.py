@@ -278,6 +278,7 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 		self.assertEqual(response.status_code, 204)
 
 	def test_delete_a_concrete_product_review_with_not_authenticated_user(self):
+		self.client.logout()
 		response = self.client.delete(
 			self.endpoint.format(
 				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
@@ -297,4 +298,4 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 			)
 		)
 
-		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.status_code, 204)

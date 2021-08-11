@@ -114,3 +114,9 @@ class ProductReviewUpdateService(BaseUpdateService):
 		entry.text = data['text']
 		entry.rating = data['rating']
 		entry.full_clean()
+
+
+class ProductReviewDeleteService(BaseDeleteService):
+	"""Service to delete a concrete product review"""
+
+	check_user_strategy = CheckIsUserAdminOrAuthorStrategy()

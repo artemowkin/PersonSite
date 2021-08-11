@@ -12,7 +12,7 @@ from ..models import Product, ProductReview
 from ..services import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
-	ProductReviewUpdateService
+	ProductReviewUpdateService, ProductReviewDeleteService
 )
 
 
@@ -212,7 +212,7 @@ class ProductReviewCreateServiceTests(TestCase):
 
 
 class ProductReviewUpdateServiceTests(TestCase):
-	"""Case of testing ProductReviewCreateService"""
+	"""Case of testing ProductReviewUpdateService"""
 
 	product_model = Product
 	review_model = ProductReview
@@ -258,3 +258,43 @@ class ProductReviewUpdateServiceTests(TestCase):
 		self.review_data['rating'] = 6
 		with self.assertRaises(ValidationError):
 			self.service.update(self.review, self.review_data, self.user)
+
+
+class ProductReviewDeleteServiceTests(TestCase):
+	"""Case of testing ProductReviewDeleteService"""
+
+	product_model = Product
+	review_model = ProductReview
+	service = ProductReviewDeleteService()
+
+	def setUp(self):
+		self.user = User.objects.create_user(
+			username='testuser', password='testpass'
+		)
+		self.product = self.product_model.objects.create(
+			title='Some product', short_description='Some short description',
+			description='Some description', price='100.00', amount=500,
+		)
+		self.review = self.review_model.objects.create(
+			text='Review text', rating=5, author=self.user,
+			product=self.product
+		)
+
+	def test_delete(self):
+		self.service.delete(self.review, self.user)
+		self.assertEqual(self.product.reviews.count(), 0)
+
+	def test_delete_with_user_who_is_not_a_review_author(self):
+		new_user = User.objects.create_user(
+			username='newuser', password='testpass'
+		)
+		with self.assertRaises(PermissionDenied):
+			self.service.delete(self.review, new_user)
+
+	def test_delete_with_admin_user(self):
+		admin = User.objects.create_superuser(
+			username='admin', password='testpass'
+		)
+		self.service.delete(self.review, admin)
+
+		self.assertEqual(self.product.reviews.count(), 0)
