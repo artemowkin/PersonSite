@@ -154,6 +154,14 @@ class ProductReviewsGetServiceTests(TestCase):
 		self.assertEqual(reviews[0], self.review)
 		self.assertEqual(reviews[0].product, self.product)
 
+	def test_get_concrete(self):
+		review = self.service.get_concrete(self.review.pk)
+		self.assertEqual(review, self.review)
+
+	def test_get_concrete_with_incorrect_pk(self):
+		with self.assertRaises(Http404):
+			self.service.get_concrete(10)
+
 
 class ProductReviewCreateServiceTests(TestCase):
 	"""Case of testing ProductReviewCreateService"""

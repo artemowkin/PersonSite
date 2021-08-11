@@ -1,7 +1,9 @@
+from uuid import UUID
 from typing import TextIO
 
 from django.db.models import QuerySet, Avg
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 
 from generic.services import (
 	BaseGetEntryService, BaseModelService, BaseCreateService,
@@ -75,9 +77,15 @@ class BaseProductReviewService:
 class ProductReviewsGetService(BaseProductReviewService):
 	"""Service to get product reviews"""
 
+	model = ProductReview
+
 	def get_all(self) -> QuerySet[ProductReview]:
 		"""Return all product reviews"""
 		return self._product.reviews.all()
+
+	def get_concrete(self, pk: UUID) -> ProductReview:
+		"""Return a concrete product review"""
+		return get_object_or_404(self.model, pk=pk, product=self._product)
 
 
 class ProductReviewCreateService(BaseProductReviewService):
