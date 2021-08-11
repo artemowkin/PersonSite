@@ -9,15 +9,25 @@ from django.shortcuts import get_object_or_404
 User = get_user_model()
 
 
-class CheckUserStrategy:
-	"""Strategy with logic to check user authorization"""
+class BaseCheckUserStrategy:
+	"""Base strategy class"""
 
 	def check_user(self, user: User):
 		"""Authorize user"""
-		pass
+		return True
+
+	def check_entry_user(self, user: User, entry: Model):
+		"""Authorize user using entry"""
+		return True
 
 
-class CheckIsUserAdminStrategy:
+class CheckUserStrategy(BaseCheckUserStrategy):
+	"""Strategy with logic to check user authorization"""
+
+	pass
+
+
+class CheckIsUserAdminStrategy(BaseCheckUserStrategy):
 	"""Strategy with logic to check is user admin"""
 
 	def check_user(self, user: User):
@@ -26,7 +36,7 @@ class CheckIsUserAdminStrategy:
 			raise PermissionDenied
 
 
-class CheckIsUserAuthenticatedStrategy:
+class CheckIsUserAuthenticatedStrategy(BaseCheckUserStrategy):
 	"""Strategy with logic to check is user authenticated"""
 
 	def check_user(self, user: User):

@@ -58,6 +58,7 @@ class BaseUpdateService:
 	def update(self, entry: Model, data: dict, user: User) -> Model:
 		"""Update the model entry using data"""
 		self.check_user_strategy.check_user(user)
+		self.check_user_strategy.check_entry_user(user, entry)
 		self.set_entry_fields(entry, data)
 		entry.save()
 		return entry
@@ -70,4 +71,5 @@ class BaseDeleteService:
 
 	def delete(self, entry: Model, user: User) -> None:
 		self.check_user_strategy.check_user(user)
+		self.check_user_strategy.check_entry_user(user, entry)
 		entry.delete()

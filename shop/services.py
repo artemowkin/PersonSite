@@ -104,16 +104,13 @@ class ProductReviewCreateService(BaseProductReviewService):
 		return review
 
 
-class ProductReviewUpdateService:
+class ProductReviewUpdateService(BaseUpdateService):
 	"""Service to update a concrete product review"""
 
 	check_user_strategy = CheckIsUserAdminOrAuthorStrategy()
 
-	def update(self, review: ProductReview, data: dict, user: User):
-		"""Update the review using data"""
-		self.check_user_strategy.check_entry_user(user, review)
-		review.text = data['text']
-		review.rating = data['rating']
-		review.full_clean()
-		review.save()
-		return review
+	def set_entry_fields(self, entry: Product, data: dict) -> None:
+		"""Set product fields using data"""
+		entry.text = data['text']
+		entry.rating = data['rating']
+		entry.full_clean()
