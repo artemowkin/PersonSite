@@ -12,7 +12,6 @@ from generic.services import (
 from generic.strategies import (
 	CheckIsUserAdminStrategy, CheckIsUserAuthenticatedStrategy
 )
-from .strategies import ProductsGetStrategy, ProductReviewsGetStrategy
 from .models import Product, ProductReview
 
 
@@ -29,7 +28,10 @@ class ProductsGetService(BaseGetService):
 	"""Service to get products entries"""
 
 	model = Product
-	get_strategy_class = ProductsGetStrategy
+
+	def get_all(self) -> QuerySet[Product]:
+		"""Get all available products"""
+		return self.model.objects.filter(available=True)
 
 
 class ProductCreateService(BaseCreateService):
@@ -72,19 +74,18 @@ class BaseProductReviewService:
 		self._product = product
 
 
-class ProductReviewsGetService(BaseGetService):
+class ProductReviewsGetService(BaseProductReviewService):
 	"""Service to get product reviews"""
 
 	model = ProductReview
-	get_strategy_class = ProductReviewsGetStrategy
 
-	def __init__(self, product: Product):
-		self._product = product
-		super().__init__()
+	def get_all(self) -> QuerySet[ProductReview]:
+		"""Return all product reviews"""
+		return self._product.reviews.all()
 
-	def get_initial_strategy_data(self):
-		data = super().get_initial_strategy_data()
-		return data | {'product': self._product}
+	def get_concrete(self, pk: UUID) -> ProductReview:
+		"""Return a concrete product review"""
+		return get_object_or_404(self.model, pk=pk, product=self._product)
 
 
 class ProductReviewCreateService(BaseProductReviewService):

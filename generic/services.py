@@ -5,7 +5,7 @@ from django.db.models import Model, QuerySet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
-from .strategies import CheckUserStrategy, SimpleGetStrategy
+from .strategies import CheckUserStrategy
 
 
 User = get_user_model()
@@ -26,27 +26,13 @@ class BaseModelService:
 class BaseGetService(BaseModelService):
 	"""Base service to get entries"""
 
-	get_strategy_class = SimpleGetStrategy
-
-	def __init__(self):
-		super().__init__()
-		strategy_data = self.get_initial_strategy_data()
-		self.get_strategy = self.get_strategy_class(**strategy_data)
-
-	def get_initial_strategy_data(self) -> dict:
-		"""
-		Return initial data for main strategy with GET logic.
-		By default data contains model
-		"""
-		return {'model': self.model}
-
-	def get_concrete(self, *args, **kwargs) -> Model:
+	def get_concrete(self, pk: UUID) -> Model:
 		"""Return a concrete model entry"""
-		return self.get_strategy.get_concrete(*args, **kwargs)
+		return get_object_or_404(self.model, pk=pk)
 
-	def get_all(self, *args, **kwargs) -> QuerySet:
+	def get_all(self) -> QuerySet:
 		"""Return all model entries"""
-		return self.get_strategy.get_all(*args, **kwargs)
+		return self.model.objects.all()
 
 
 class BaseCreateService(BaseModelService):

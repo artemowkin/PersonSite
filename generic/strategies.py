@@ -33,31 +33,3 @@ class CheckIsUserAuthenticatedStrategy:
 		"""Check is user authenticated"""
 		if not user.is_authenticated:
 			raise PermissionDenied
-
-
-class BaseGetStrategy:
-	"""Base strategy with generic logic to get model entries"""
-
-	def get_concrete(self, pk: UUID) -> Model:
-		"""
-		Return a concrete model entry with pk. Raises Http404
-		if not exists
-		"""
-		return get_object_or_404(self._model, pk=pk)
-
-	def get_all(self) -> QuerySet:
-		"""Return all model entries"""
-		return self._model.objects.all()
-
-
-class BaseModelGetStrategy(BaseGetStrategy):
-	"""Base get strategy with included model in constructor"""
-
-	def __init__(self, model: type):
-		self._model = model
-
-
-class SimpleGetStrategy(BaseModelGetStrategy):
-	"""Strategy with generic logic to get model entries"""
-
-	pass
