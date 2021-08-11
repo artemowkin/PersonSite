@@ -3,7 +3,7 @@ from typing import TextIO
 from django.db.models import QuerySet
 
 from generic.services import (
-	BaseGetEntryService, BaseModelService, BaseCreateService,
+	BaseGetService, BaseModelService, BaseCreateService,
 	BaseUpdateService, BaseDeleteService
 )
 from generic.strategies import CheckIsUserAdminStrategy
@@ -11,7 +11,7 @@ from generic.strategies import CheckIsUserAdminStrategy
 from .models import Post
 
 
-class PostGetService(BaseGetEntryService):
+class PostGetService(BaseGetService):
 	"""Service to get posts entries"""
 
 	model = Post
