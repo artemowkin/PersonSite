@@ -828,6 +828,77 @@ paths:
                 $ref: "#/components/schemas/ProductReview"
       tags:
         - shop
+    put:
+      operationId: updateConcreteShopProductReview
+      description: Update a concrete product review
+      parameters:
+      - name: product_pk
+        in: path
+        required: true
+        description: 'Product pk field'
+        schema:
+          type: string
+          format: uuid
+      - name: review_pk
+        in: path
+        required: true
+        description: 'ProductReview pk field'
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  required: true
+                  minLength: 1
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  required: true
+                  example: 5
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductReview"
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: array
+                    items:
+                      type: string
+                      example: "This field may not be blank."
+                  rating:
+                    type: array
+                    items:
+                      type: string
+                      example: "Ensure this value is less than or equal to 5."
+                      description: "Rating may not be less than 1 or more than 5"
+          description: 'Error with data in request'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not a review author or
+
+          not a superuser tries to update the review'
 components:
   schemas:
     UserDetails:
