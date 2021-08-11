@@ -50,8 +50,14 @@ class BaseGetStrategy:
 		return self._model.objects.all()
 
 
-class SimpleGetStrategy(BaseGetStrategy):
-	"""Strategy with generic logic to get model entries"""
+class BaseModelGetStrategy(BaseGetStrategy):
+	"""Base get strategy with included model in constructor"""
 
 	def __init__(self, model: type):
 		self._model = model
+
+
+class SimpleGetStrategy(BaseModelGetStrategy):
+	"""Strategy with generic logic to get model entries"""
+
+	pass

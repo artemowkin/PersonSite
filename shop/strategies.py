@@ -3,15 +3,12 @@ from uuid import UUID
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
-from generic.strategies import BaseGetStrategy
+from generic.strategies import BaseGetStrategy, BaseModelGetStrategy
 from .models import Product, ProductReview
 
 
-class ProductsGetStrategy(BaseGetStrategy):
+class ProductsGetStrategy(BaseModelGetStrategy):
 	"""Strategy to get products with getting all available products"""
-
-	def __init__(self, model: type):
-		self._model = model
 
 	def get_all(self) -> QuerySet[Product]:
 		"""Get all available products"""
