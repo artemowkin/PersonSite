@@ -160,3 +160,38 @@ class AllProductReviewsEndpointFunctionalTests(TestCase):
 		self.assertIn('pk', json_response)
 		self.assertEqual(json_response['text'], 'New review')
 		self.assertEqual(json_response['rating'], 5)
+
+	def test_create_a_new_product_with_not_authenticated_user(self):
+		self.client.logout()
+		response = self.client.post(
+			self.endpoint.format(product_pk=str(self.product.pk)), {
+				'text': 'New review', 'rating': 5
+			}
+		)
+
+		self.assertEqual(response.status_code, 403)
+
+
+class ConcreteProductReviewEndpointFunctionalTests(TestCase):
+	"""
+	Case of testing /shop/products/{product_pk}/reviews/{review_pk}
+	endpoint
+	"""
+
+	endpoint = '/shop/products/{product_pk}/reviews/{review_pk}/'
+	product_model = Product
+	review_model = ProductReview
+
+	def setUp(self):
+		_product_review_setup(self)
+
+	def test_get_concrete_product_review(self):
+		response = self.client.get(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			)
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, self.serialized_review)
