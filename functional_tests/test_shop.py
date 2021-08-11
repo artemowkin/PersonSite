@@ -213,7 +213,7 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(json_response, self.serialized_review)
 
-	def test_update_a_concrete_entry(self):
+	def test_update_a_concrete_product_review(self):
 		response = self.client.put(
 			self.endpoint.format(
 				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
@@ -226,7 +226,7 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(json_response, self.serialized_review)
 
-	def test_update_a_concrete_entry_with_not_authenticated_user(self):
+	def test_update_a_concrete_product_review_with_not_authenticated_user(self):
 		self.client.logout()
 		response = self.client.put(
 			self.endpoint.format(
@@ -237,7 +237,24 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 
 		self.assertEqual(response.status_code, 403)
 
-	def test_update_a_concrete_product_with_incorrect_rating(self):
+	def test_update_a_concrete_product_review_with_admin_user(self):
+		admin = User.objects.create_superuser(
+			username='admin', password='testpass'
+		)
+		self.client.login(username='admin', password='testpass')
+		response = self.client.put(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			), {'text': 'Updated review', 'rating': 5},
+			content_type='application/json'
+		)
+		json_response = json.loads(response.content)
+		self.serialized_review['text'] = 'Updated review'
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(json_response, self.serialized_review)
+
+	def test_update_a_concrete_product_review_with_incorrect_rating(self):
 		response = self.client.put(
 			self.endpoint.format(
 				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
@@ -250,3 +267,34 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 		self.assertEqual(json_response, {
 			'rating': ['Ensure this value is less than or equal to 5.']
 		})
+
+	def test_delete_a_concrete_product_review(self):
+		response = self.client.delete(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			)
+		)
+
+		self.assertEqual(response.status_code, 204)
+
+	def test_delete_a_concrete_product_review_with_not_authenticated_user(self):
+		response = self.client.delete(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			)
+		)
+
+		self.assertEqual(response.status_code, 403)
+
+	def test_delete_a_concrete_product_review_with_admin_user(self):
+		admin = User.objects.create_superuser(
+			username='admin', password='testpass'
+		)
+		self.client.login(username='admin', password='testpass')
+		response = self.client.delete(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			)
+		)
+
+		self.assertEqual(response.status_code, 200)
