@@ -175,6 +175,19 @@ class AllProductReviewsEndpointFunctionalTests(TestCase):
 
 		self.assertEqual(response.status_code, 403)
 
+	def test_create_a_new_product_with_incorrect_rating(self):
+		response = self.client.post(
+			self.endpoint.format(product_pk=str(self.product.pk)), {
+				'text': 'New review', 'rating': 6
+			}
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'rating': ['Ensure this value is less than or equal to 5.']
+		})
+
 
 class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 	"""
@@ -223,3 +236,17 @@ class ConcreteProductReviewEndpointFunctionalTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, 403)
+
+	def test_update_a_concrete_product_with_incorrect_rating(self):
+		response = self.client.put(
+			self.endpoint.format(
+				product_pk=str(self.product.pk), review_pk=str(self.review.pk)
+			), {'text': 'Updated review', 'rating': 6},
+			content_type='application/json'
+		)
+		json_response = json.loads(response.content)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(json_response, {
+			'rating': ['Ensure this value is less than or equal to 5.']
+		})
