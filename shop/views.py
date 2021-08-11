@@ -75,3 +75,18 @@ class AllProductReviewsView(BaseProductReviewView):
 			return Response(serializer_data, 201)
 
 		return Response(serializer.errors, 400)
+
+
+class ConcreteProductReviewView(BaseProductReviewView):
+	"""View to render a concrete product review, update and delete it"""
+
+	get_product_service = ProductsGetService()
+	get_reviews_service_class = ProductReviewsGetService
+	serializer_class = ProductReviewSerializer
+
+	def get(self, request, product_pk, review_pk):
+		product = self.get_product_service.get_concrete(product_pk)
+		get_reviews_service = self.get_reviews_service_class(product)
+		review = get_reviews_service.get_concrete(review_pk)
+		serialized_review = self.serializer_class(review)
+		return Response(serialized_review.data)
