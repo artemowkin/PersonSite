@@ -46,9 +46,7 @@ class BaseConcreteView(BaseCommandView):
 
 	get_command_class = None
 	update_command_class = None
-	get_service = None
-	update_service = None
-	delete_service = None
+	delete_command_class = None
 	serializer_class = None
 
 	def __init__(self, *args, **kwargs):
@@ -63,20 +61,10 @@ class BaseConcreteView(BaseCommandView):
 				f"{self.__class__.__name__} must have "
 				"`update_command_class` attribute"
 			)
-		if not self.get_service:
+		if not self.delete_command_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
-				"`get_service` attribute"
-			)
-		if not self.update_service:
-			raise ImproperlyConfigured(
-				f"{self.__class__.__name__} must have "
-				"`update_service` attribute"
-			)
-		if not self.delete_service:
-			raise ImproperlyConfigured(
-				f"{self.__class__.__name__} must have "
-				"`delete_service` attribute"
+				"`delete_command_class` attribute"
 			)
 		if not self.serializer_class:
 			raise ImproperlyConfigured(
@@ -95,9 +83,8 @@ class BaseConcreteView(BaseCommandView):
 		return self.get_command_response(update_command)
 
 	def delete(self, request, pk):
-		concrete_entry = self.get_service.get_concrete(pk)
-		self.delete_service.delete(concrete_entry, request.user)
-		return Response(status=204)
+		delete_command = self.update_command_class(pk, request.user)
+		return self.get_command_response(delete_command)
 
 
 class BaseUploadImageView(APIView):

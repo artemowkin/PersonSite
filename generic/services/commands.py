@@ -130,7 +130,7 @@ class BaseUpdateCommand(BaseGetCommand):
 
 	def execute(self) -> tuple[dict, int]:
 		"""
-		Create a new entry and return this serialized entry
+		Update a concrete entry and return this serialized entry
 		(or error messages) and response status code
 		"""
 		serializer = self.serializer_class(data=self._data)
@@ -148,3 +148,31 @@ class BaseUpdateCommand(BaseGetCommand):
 		)
 		serialized_entry = self.serializer_class(changed_entry)
 		return serialized_entry.data
+
+
+class BaseDeleteCommand(BaseGetCommand):
+	"""Base command to delete a concrete entry"""
+
+	delete_service_class = None
+	serializer_class = None
+
+	def __init__(self, pk: UUID, user: User):
+		self.check_attributes()
+		self._pk = pk
+		self._user = user
+		self._get_service = self.get_service_class()
+		self._delete_service = self.delete_service_class()
+
+	def check_attributes(self):
+		super().check_attributes()
+		if not self.delete_service_class:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`delete_service_class` attribute"
+			)
+
+	def execute(self) -> tuple[None, int]:
+		"""Delete a concrete entry and return 204 response"""
+		concrete_entry = self._get_service.get_concrete(self._pk)
+		self.delete_service.delete(concrete_entry, self._user)
+		return (None, 204)
