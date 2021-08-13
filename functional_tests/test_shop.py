@@ -155,7 +155,7 @@ class AllProductReviewsEndpointFunctionalTests(TestCase):
 		response = self.client.post(
 			self.endpoint.format(product_pk=str(self.product.pk)), {
 				'text': 'New review', 'rating': 5
-			}
+			}, content_type='application/json'
 		)
 		json_response = json.loads(response.content)
 
@@ -170,7 +170,7 @@ class AllProductReviewsEndpointFunctionalTests(TestCase):
 		response = self.client.post(
 			self.endpoint.format(product_pk=str(self.product.pk)), {
 				'text': 'New review', 'rating': 5
-			}
+			}, content_type='application/json'
 		)
 
 		self.assertEqual(response.status_code, 403)
@@ -179,7 +179,7 @@ class AllProductReviewsEndpointFunctionalTests(TestCase):
 		response = self.client.post(
 			self.endpoint.format(product_pk=str(self.product.pk)), {
 				'text': 'New review', 'rating': 6
-			}
+			}, content_type='application/json'
 		)
 		json_response = json.loads(response.content)
 

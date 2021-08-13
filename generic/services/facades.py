@@ -13,7 +13,7 @@ class BaseAPICRUDFacade:
 		"""Return a concrete entry"""
 		entry = self.get_service.get_concrete(pk)
 		serialized_entry = self.serializer_class(entry).data
-		return serialized_entry
+		return (serialized_entry, 200)
 
 	def get_all(self) -> tuple[list, int]:
 		"""Return all entries"""

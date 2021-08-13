@@ -2,25 +2,19 @@ from generic.views import (
 	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
 )
 from .services.base import PostGetService, PostUpdateService
-from .services.commands import (
-	GetAllPostsCommand, CreatePostCommand, GetConcretePostCommand,
-	UpdatePostCommand, DeletePostCommand
-)
+from .services.facades import PostCRUDFacade
 
 
 class AllCreatePostsView(BaseAllCreateView):
 	"""View to render all posts entries"""
 
-	get_command_class = GetAllPostsCommand
-	create_command_class = CreatePostCommand
+	facade_class = PostCRUDFacade
 
 
 class ConcretePostView(BaseConcreteView):
 	"""View to render a concrete post entry"""
 
-	get_command_class = GetConcretePostCommand
-	update_command_class = UpdatePostCommand
-	delete_command_class = DeletePostCommand
+	facade_class = PostCRUDFacade
 
 
 class PostPreviewUploadView(BaseUploadImageView):
