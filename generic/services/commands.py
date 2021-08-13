@@ -70,7 +70,7 @@ class BaseCreateCommand:
 		serializer = self.serializer_class(data=self._data)
 		if serializer.is_valid():
 			serialized_entry = self._create_entry(serializer)
-			return (serializer_entry, 201)
+			return (serialized_entry, 201)
 
 		return (serializer.errors, 400)
 

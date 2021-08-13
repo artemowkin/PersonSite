@@ -6,42 +6,33 @@ from rest_framework.response import Response
 class BaseAllCreateView(APIView):
 	"""Base view to render all entries and create a new entry"""
 
-	create_service = None
+	create_command_class = None
 	get_command_class = None
-	serializer_class = None
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		if not self.create_service:
+		if not self.create_command_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
-				"`create_service` attribute"
+				"`create_command_class` attribute"
 			)
 		if not self.get_command_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
 				"`get_command` attribute"
 			)
-		if not self.serializer_class:
-			raise ImproperlyConfigured(
-				f"{self.__class__.__name__} must have "
-				"`serializer_class` attribute"
-			)
+
+	def _get_command_response(self, command):
+		data, status_code = command.execute()
+		return Response(data, status=status_code)
 
 	def get(self, request):
 		get_command = self.get_command_class()
-		data, status_code = get_command.execute()
-		return Response(data, status=status_code)
+		return self._get_command_response(get_command)
 
 	def post(self, request):
-		serializer = self.serializer_class(data=request.data)
-		if serializer.is_valid():
-			entry = self.create_service.create(serializer.data, request.user)
-			serializer_data = serializer.data
-			serializer_data |= {'pk': entry.pk}
-			return Response(serializer_data, status=201)
-
-		return Response(serializer.errors, status=400)
+		create_command = self.create_command_class(request.data, request.user)
+		return self._get_command_response(create_command)
 
 
 class BaseConcreteView(APIView):
