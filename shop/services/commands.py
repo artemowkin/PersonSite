@@ -1,12 +1,16 @@
 from uuid import UUID
 
-from generic.services.commands import BaseGetAllCommand, BaseCreateCommand
+from django.contrib.auth import get_user_model
 
+from generic.services.commands import BaseGetAllCommand, BaseCreateCommand
 from .base import (
 	ProductsGetService, ProductCreateService, ProductReviewsGetService,
-	count_overall_rating
+	ProductReviewCreateService, count_overall_rating
 )
 from ..serializers import ProductSerializer, ProductReviewSerializer
+
+
+User = get_user_model()
 
 
 class GetAllProductsCommand(BaseGetAllCommand):
@@ -24,20 +28,20 @@ class CreateProductCommand(BaseCreateCommand):
 
 
 class GetAllProductReviewsCommand:
-	"""Base command to get all entries"""
+	"""Command to get all product reviews"""
 
 	get_product_service_class = ProductsGetService
 	get_review_service_class = ProductReviewsGetService
 	serializer_class = ProductReviewSerializer
 
-	def __init__(self, product_pk: UUID):
-		self._product_pk = product_pk
+	def __init__(self, pk: UUID):
+		self._product_pk = pk
 		self._get_product_service = self.get_product_service_class()
 
 	def _get_all_product_reviews(self):
 		"""Get a concrete product and return all reviews on this product"""
 		product = self._get_product_service.get_concrete(self._product_pk)
-		get_review_service = self._get_review_service_class(product)
+		get_review_service = self.get_review_service_class(product)
 		all_product_reviews = get_review_service.get_all()
 		return all_product_reviews
 
@@ -56,3 +60,37 @@ class GetAllProductReviewsCommand:
 			'reviews': serialized_reviews.data
 		}
 		return response_data, 200
+
+
+class CreateProductReviewCommand:
+	"""Command to create a new product review"""
+
+	get_product_service_class = ProductsGetService
+	create_review_service_class = ProductReviewCreateService
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, data: dict, user: User, pk: UUID):
+		self._data = data
+		self._user = user
+		self._product_pk = pk
+		self._get_product_service = self.get_product_service_class()
+
+	def _create_review(self, serializer: ProductReviewSerializer) -> dict:
+		"""Create a new review and return this serialized review"""
+		product = self._get_product_service.get_concrete(self._product_pk)
+		create_review_service = self.create_review_service_class(product)
+		review = create_review_service.create(serializer.data, self._user)
+		serialized_review = self.serializer_class(review).data
+		return serialized_review
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Get a concrete product and create for this product a new review
+		using data and user
+		"""
+		serializer = self.serializer_class(data=self._data)
+		if serializer.is_valid():
+			serialized_review = self._create_review(serializer)
+			return (serialized_review, 201)
+
+		return (serializer.errors, 400)

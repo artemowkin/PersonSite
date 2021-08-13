@@ -26,12 +26,14 @@ class BaseAllCreateView(APIView):
 		data, status_code = command.execute()
 		return Response(data, status=status_code)
 
-	def get(self, request):
-		get_command = self.get_command_class()
+	def get(self, request, *args, **kwargs):
+		get_command = self.get_command_class(*args, **kwargs)
 		return self._get_command_response(get_command)
 
-	def post(self, request):
-		create_command = self.create_command_class(request.data, request.user)
+	def post(self, request, *args, **kwargs):
+		create_command = self.create_command_class(
+			request.data, request.user, *args, **kwargs
+		)
 		return self._get_command_response(create_command)
 
 
