@@ -2,7 +2,9 @@ from uuid import UUID
 
 from django.contrib.auth import get_user_model
 
-from generic.services.commands import BaseGetAllCommand, BaseCreateCommand
+from generic.services.commands import (
+	BaseGetAllCommand, BaseCreateCommand, BaseGetConcreteCommand
+)
 from .base import (
 	ProductsGetService, ProductCreateService, ProductReviewsGetService,
 	ProductReviewCreateService, count_overall_rating

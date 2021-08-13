@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import Serializer
@@ -6,15 +8,14 @@ from rest_framework.serializers import Serializer
 User = get_user_model()
 
 
-class BaseGetAllCommand:
-	"""Base command to get all entries"""
+class BaseGetCommand:
+	"""Base command to get all/concrete entries"""
 
 	get_service_class = None
 	serializer_class = None
 
 	def __init__(self):
 		self._check_attributes()
-		self._get_service = self.get_service_class()
 
 	def _check_attributes(self):
 		if not self.get_service_class:
@@ -27,6 +28,14 @@ class BaseGetAllCommand:
 				f"{self.__class__.__name__} must have "
 				"`serializer_class` attribute"
 			)
+
+
+class BaseGetAllCommand(BaseGetCommand):
+	"""Base command to get all entries"""
+
+	def __init__(self):
+		super().__init__()
+		self._get_service = self.get_service_class()
 
 	def execute(self) -> tuple[dict, int]:
 		"""
@@ -79,3 +88,21 @@ class BaseCreateCommand:
 		entry = self._create_service.create(serializer.data, self._user)
 		serialized_entry = self.serializer_class(entry).data
 		return serialized_entry
+
+
+class BaseGetConcreteCommand(BaseGetCommand):
+	"""Base command to get a concrete entry"""
+
+	def __init__(self, pk: UUID):
+		super().__init__()
+		self._pk = pk
+		self._get_service = self.get_service_class()
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Get a concrete entry and return this serialized entry
+		and status code of response
+		"""
+		concrete_entry = self._get_service.get_concrete(self._pk)
+		serializer = self.serializer_class(concrete_entry)
+		return (serializer.data, 200)

@@ -3,7 +3,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-class BaseAllCreateView(APIView):
+class BaseCommandView(APIView):
+	"""Base view with using commands"""
+
+	def get_command_response(self, command):
+		data, status_code = command.execute()
+		return Response(data, status=status_code)
+
+
+class BaseAllCreateView(BaseCommandView):
 	"""Base view to render all entries and create a new entry"""
 
 	create_command_class = None
@@ -22,24 +30,21 @@ class BaseAllCreateView(APIView):
 				"`get_command` attribute"
 			)
 
-	def _get_command_response(self, command):
-		data, status_code = command.execute()
-		return Response(data, status=status_code)
-
 	def get(self, request, *args, **kwargs):
 		get_command = self.get_command_class(*args, **kwargs)
-		return self._get_command_response(get_command)
+		return self.get_command_response(get_command)
 
 	def post(self, request, *args, **kwargs):
 		create_command = self.create_command_class(
 			request.data, request.user, *args, **kwargs
 		)
-		return self._get_command_response(create_command)
+		return self.get_command_response(create_command)
 
 
-class BaseConcreteView(APIView):
+class BaseConcreteView(BaseCommandView):
 	"""Base view to render a concrete entry, update it, and delete it"""
 
+	get_command_class = None
 	get_service = None
 	update_service = None
 	delete_service = None
@@ -47,6 +52,11 @@ class BaseConcreteView(APIView):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		if not self.get_command_class:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`get_command_class` attribute"
+			)
 		if not self.get_service:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
@@ -69,9 +79,8 @@ class BaseConcreteView(APIView):
 			)
 
 	def get(self, request, pk):
-		concrete_entry = self.get_service.get_concrete(pk)
-		serializer = self.serializer_class(concrete_entry)
-		return Response(serializer.data)
+		get_command = self.get_command_class(pk)
+		return self.get_command_response(get_command)
 
 	def put(self, request, pk):
 		serializer = self.serializer_class(data=request.data)
