@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from generic.views import (
-	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
+	BaseAllCreateView, BaseConcreteView, BaseUploadImageView, BaseCommandView
 )
 from .services.base import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
@@ -14,7 +14,8 @@ from .services.base import (
 from .services.commands import (
 	GetAllProductsCommand, CreateProductCommand, GetAllProductReviewsCommand,
 	CreateProductReviewCommand, GetConcreteProductCommand, UpdateProductCommand,
-	DeleteProductCommand
+	DeleteProductCommand, GetConcreteProductReviewCommand,
+	UpdateProductReviewCommand, DeleteProductReviewCommand
 )
 from .serializers import ProductSerializer, ProductReviewSerializer
 
@@ -40,53 +41,34 @@ class ProductImageUploadView(BaseUploadImageView):
 	update_service = ProductUpdateService()
 
 
-class BaseProductReviewView(APIView):
-	"""Base view to render product reviews"""
-
-	permission_classes = [IsAuthenticated]
-
-
 class AllProductReviewsView(BaseAllCreateView):
 	"""View to render all product reviews and create a new"""
 
 	get_command_class = GetAllProductReviewsCommand
 	create_command_class = CreateProductReviewCommand
-	permission_classes = [IsAuthenticated]
+	permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-class ConcreteProductReviewView(BaseProductReviewView):
+class ConcreteProductReviewView(BaseCommandView):
 	"""View to render a concrete product review, update and delete it"""
 
-	get_product_service = ProductsGetService()
-	get_reviews_service_class = ProductReviewsGetService
-	update_review_service = ProductReviewUpdateService()
-	delete_review_service = ProductReviewDeleteService()
-	serializer_class = ProductReviewSerializer
-
-	def _get_product_review(self, product_pk, review_pk):
-		product = self.get_product_service.get_concrete(product_pk)
-		get_reviews_service = self.get_reviews_service_class(product)
-		review = get_reviews_service.get_concrete(review_pk)
-		return review
+	get_command_class = GetConcreteProductReviewCommand
+	update_command_class = UpdateProductReviewCommand
+	delete_command_class = DeleteProductReviewCommand
+	permission_classes = [IsAuthenticatedOrReadOnly]
 
 	def get(self, request, product_pk, review_pk):
-		review = self._get_product_review(product_pk, review_pk)
-		serialized_review = self.serializer_class(review)
-		return Response(serialized_review.data)
+		get_command = self.get_command_class(product_pk, review_pk)
+		return self.get_command_response(get_command)
 
 	def put(self, request, product_pk, review_pk):
-		serializer = self.serializer_class(data=request.data)
-		if serializer.is_valid():
-			review = self._get_product_review(product_pk, review_pk)
-			updated_review = self.update_review_service.update(
-				review, serializer.data, request.user
-			)
-			serialized_review = self.serializer_class(updated_review)
-			return Response(serialized_review.data)
-
-		return Response(serializer.errors, status=400)
+		update_command = self.update_command_class(
+			request.data, request.user, product_pk, review_pk
+		)
+		return self.get_command_response(update_command)
 
 	def delete(self, request, product_pk, review_pk):
-		review = self._get_product_review(product_pk, review_pk)
-		self.delete_review_service.delete(review, request.user)
-		return Response(status=204)
+		delete_command = self.delete_command_class(
+			request.user, product_pk, review_pk
+		)
+		return self.get_command_response(delete_command)

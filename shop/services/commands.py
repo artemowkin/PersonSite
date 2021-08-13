@@ -4,13 +4,15 @@ from django.contrib.auth import get_user_model
 
 from generic.services.commands import (
 	BaseGetAllCommand, BaseCreateCommand, BaseGetConcreteCommand,
-	BaseUpdateCommand, BaseDeleteCommand
+	BaseUpdateCommand, BaseDeleteCommand, UpdateEntryMixin
 )
 from .base import (
 	ProductsGetService, ProductCreateService, ProductReviewsGetService,
 	ProductReviewCreateService, ProductUpdateService, ProductDeleteService,
+	ProductReviewUpdateService, ProductReviewDeleteService,
 	count_overall_rating
 )
+from ..models import ProductReview
 from ..serializers import ProductSerializer, ProductReviewSerializer
 
 
@@ -89,6 +91,43 @@ class GetAllProductReviewsCommand:
 		return response_data, 200
 
 
+class BaseConcreteProductReviewCommand:
+	"""Base command with logic to get a concrete product review"""
+
+	get_product_service_class = ProductsGetService
+	get_reviews_service_class = ProductReviewsGetService
+
+	def get_product_review(self) -> ProductReview:
+		"""
+		Get a concrete product by pk and find in this product
+		review using pk
+		"""
+		product = self._get_product_service.get_concrete(self._product_pk)
+		get_reviews_service = self.get_reviews_service_class(product)
+		review = get_reviews_service.get_concrete(self._review_pk)
+		return review
+
+
+class GetConcreteProductReviewCommand(BaseConcreteProductReviewCommand):
+	"""Command to get a concrete product review"""
+
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, product_pk: UUID, review_pk: UUID):
+		self._product_pk = product_pk
+		self._review_pk = review_pk
+		self._get_product_service = self.get_product_service_class()
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Get a concrete product review and return this serialized review
+		and status code of response
+		"""
+		review = self.get_product_review()
+		serialized_review = self.serializer_class(review)
+		return (serialized_review.data, 200)
+
+
 class CreateProductReviewCommand:
 	"""Command to create a new product review"""
 
@@ -121,3 +160,55 @@ class CreateProductReviewCommand:
 			return (serialized_review, 201)
 
 		return (serializer.errors, 400)
+
+
+class UpdateProductReviewCommand(
+		BaseConcreteProductReviewCommand, UpdateEntryMixin):
+	"""Command to update a concrete product review"""
+
+	update_review_service_class = ProductReviewUpdateService
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, data: dict, user: User,
+			product_pk: UUID, review_pk: UUID):
+		self._data = data
+		self._user = user
+		self._product_pk = product_pk
+		self._review_pk = review_pk
+		self._get_product_service = self.get_product_service_class()
+		self._update_service = self.update_review_service_class()
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Update a concrete product review and return this serialized review
+		and status code of response
+		"""
+		serializer = self.serializer_class(data=self._data)
+		if serializer.is_valid():
+			review = self.get_product_review()
+			updated_review = self.change_entry(review, serializer)
+			return (updated_review, 200)
+
+		return (serializer.errors, 400)
+
+
+class DeleteProductReviewCommand(BaseConcreteProductReviewCommand):
+	"""Command to delete a concrete product review"""
+
+	delete_review_service_class = ProductReviewDeleteService
+
+	def __init__(self, user: User, product_pk: UUID, review_pk: UUID):
+		self._user = user
+		self._product_pk = product_pk
+		self._review_pk = review_pk
+		self._get_product_service = self.get_product_service_class()
+		self._delete_service = self.delete_review_service_class()
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Get a concrete product review and return this serialized review
+		and status code of response
+		"""
+		review = self.get_product_review()
+		self._delete_service.delete(review, self._user)
+		return (None, 204)

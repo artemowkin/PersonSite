@@ -106,7 +106,19 @@ class BaseGetConcreteCommand(BaseGetCommand):
 		return (serializer.data, 200)
 
 
-class BaseUpdateCommand(BaseGetCommand):
+class UpdateEntryMixin:
+	"""Mixin to update a concrete entry"""
+
+	def change_entry(self, entry: Model, serializer: Serializer) -> dict:
+		"""Change the entry and return this changed serilaized entry"""
+		changed_entry = self._update_service.update(
+			entry, serializer.data, self._user
+		)
+		serialized_entry = self.serializer_class(changed_entry)
+		return serialized_entry.data
+
+
+class BaseUpdateCommand(BaseGetCommand, UpdateEntryMixin):
 	"""Base command to update a concrete entry"""
 
 	update_service_class = None
@@ -136,18 +148,10 @@ class BaseUpdateCommand(BaseGetCommand):
 		serializer = self.serializer_class(data=self._data)
 		if serializer.is_valid():
 			concrete_entry = self._get_service.get_concrete(self._pk)
-			changed_entry = self._change_entry(concrete_entry, serializer)
+			changed_entry = self.change_entry(concrete_entry, serializer)
 			return (changed_entry, 200)
 
 		return Response(serializer.errors, status=400)
-
-	def _change_entry(self, entry: Model, serializer: Serializer) -> dict:
-		"""Change the entry and return this changed serilaized entry"""
-		changed_entry = self._update_service.update(
-			entry, serializer.data, self._user
-		)
-		serialized_entry = self.serializer_class(changed_entry)
-		return serialized_entry.data
 
 
 class BaseDeleteCommand(BaseGetCommand):
