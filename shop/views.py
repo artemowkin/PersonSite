@@ -11,15 +11,15 @@ from .services.base import (
 	ProductReviewUpdateService, ProductReviewDeleteService,
 	count_overall_rating,
 )
+from .services.commands import GetAllProductsCommand, CreateProductCommand
 from .serializers import ProductSerializer, ProductReviewSerializer
 
 
 class AllCreateProductsView(BaseAllCreateView):
 	"""View to render all products"""
 
-	create_service = ProductCreateService()
-	get_service = ProductsGetService()
-	serializer_class = ProductSerializer
+	get_command_class = GetAllProductsCommand
+	create_command_class = CreateProductCommand
 
 
 class ConcreteProductView(BaseConcreteView):
