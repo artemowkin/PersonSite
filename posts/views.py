@@ -5,7 +5,8 @@ from .services.base import (
 	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
 )
 from .services.commands import (
-	GetAllPostsCommand, CreatePostCommand, GetConcretePostCommand
+	GetAllPostsCommand, CreatePostCommand, GetConcretePostCommand,
+	UpdatePostCommand
 )
 from .serializers import PostSerializer
 
@@ -21,6 +22,7 @@ class ConcretePostView(BaseConcreteView):
 	"""View to render a concrete post entry"""
 
 	get_command_class = GetConcretePostCommand
+	update_command_class = UpdatePostCommand
 	get_service = PostGetService()
 	update_service = PostUpdateService()
 	delete_service = PostDeleteService()

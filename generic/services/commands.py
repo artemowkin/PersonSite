@@ -136,12 +136,12 @@ class BaseUpdateCommand(BaseGetCommand):
 		serializer = self.serializer_class(data=self._data)
 		if serializer.is_valid():
 			concrete_entry = self._get_service.get_concrete(self._pk)
-			changed_entry = self._change_entry(concrete_entry)
+			changed_entry = self._change_entry(concrete_entry, serializer)
 			return (changed_entry, 200)
 
 		return Response(serializer.errors, status=400)
 
-	def _change_entry(self, entry: Model) -> dict:
+	def _change_entry(self, entry: Model, serializer: Serializer) -> dict:
 		"""Change the entry and return this changed serilaized entry"""
 		changed_entry = self._update_service.update(
 			entry, serializer.data, self._user
