@@ -8,7 +8,7 @@ from generic.unit_tests import (
 	DeleteServiceMixin
 )
 from ..models import Post
-from ..services import (
+from ..services.base import (
 	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
 )
 

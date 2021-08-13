@@ -7,7 +7,7 @@ class BaseAllCreateView(APIView):
 	"""Base view to render all entries and create a new entry"""
 
 	create_service = None
-	get_service = None
+	get_command_class = None
 	serializer_class = None
 
 	def __init__(self, *args, **kwargs):
@@ -17,10 +17,10 @@ class BaseAllCreateView(APIView):
 				f"{self.__class__.__name__} must have "
 				"`create_service` attribute"
 			)
-		if not self.get_service:
+		if not self.get_command_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
-				"`get_service` attribute"
+				"`get_command` attribute"
 			)
 		if not self.serializer_class:
 			raise ImproperlyConfigured(
@@ -29,9 +29,9 @@ class BaseAllCreateView(APIView):
 			)
 
 	def get(self, request):
-		all_entries = self.get_service.get_all()
-		serializer = self.serializer_class(all_entries, many=True)
-		return Response(serializer.data)
+		get_command = self.get_command_class()
+		data, status_code = get_command.execute()
+		return Response(data, status=status_code)
 
 	def post(self, request):
 		serializer = self.serializer_class(data=request.data)

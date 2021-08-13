@@ -1,9 +1,10 @@
 from generic.views import (
 	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
 )
-from .services import (
+from .services.base import (
 	PostGetService, PostCreateService, PostUpdateService, PostDeleteService
 )
+from .services.commands import GetAllPostsCommand
 from .serializers import PostSerializer
 
 
@@ -11,7 +12,7 @@ class AllCreatePostsView(BaseAllCreateView):
 	"""View to render all posts entries"""
 
 	create_service = PostCreateService()
-	get_service = PostGetService()
+	get_command_class = GetAllPostsCommand
 	serializer_class = PostSerializer
 
 

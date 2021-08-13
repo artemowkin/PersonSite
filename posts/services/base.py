@@ -8,7 +8,7 @@ from generic.services.base import (
 )
 from generic.services.strategies import CheckIsUserAdminStrategy
 
-from .models import Post
+from ..models import Post
 
 
 class PostGetService(BaseGetService):
