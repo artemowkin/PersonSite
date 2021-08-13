@@ -83,7 +83,7 @@ class BaseConcreteView(BaseCommandView):
 		return self.get_command_response(update_command)
 
 	def delete(self, request, pk):
-		delete_command = self.update_command_class(pk, request.user)
+		delete_command = self.delete_command_class(pk, request.user)
 		return self.get_command_response(delete_command)
 
 

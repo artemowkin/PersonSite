@@ -174,5 +174,5 @@ class BaseDeleteCommand(BaseGetCommand):
 	def execute(self) -> tuple[None, int]:
 		"""Delete a concrete entry and return 204 response"""
 		concrete_entry = self._get_service.get_concrete(self._pk)
-		self.delete_service.delete(concrete_entry, self._user)
+		self._delete_service.delete(concrete_entry, self._user)
 		return (None, 204)
