@@ -109,7 +109,7 @@ class ProductReviewUpdateService(BaseUpdateService):
 
 	check_user_strategy = CheckIsUserAdminOrAuthorStrategy()
 
-	def set_entry_fields(self, entry: Product, data: dict) -> None:
+	def set_entry_fields(self, entry: ProductReview, data: dict) -> None:
 		"""Set product fields using data"""
 		entry.text = data['text']
 		entry.rating = data['rating']

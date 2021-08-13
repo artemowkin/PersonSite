@@ -25,6 +25,9 @@ class GetAllProductsCommand(BaseGetAllCommand):
 	get_service_class = ProductsGetService
 	serializer_class = ProductSerializer
 
+	def __init__(self):
+		self._get_service = self.get_service_class()
+
 
 class GetConcreteProductCommand(BaseGetConcreteCommand):
 	"""Command to get a concrete product"""
@@ -32,12 +35,22 @@ class GetConcreteProductCommand(BaseGetConcreteCommand):
 	get_service_class = ProductsGetService
 	serializer_class = ProductSerializer
 
+	def __init__(self, pk: UUID):
+		self._get_service = self.get_service_class()
+		self._pk = pk
+
 
 class CreateProductCommand(BaseCreateCommand):
 	"""Command to create a new product"""
 
 	create_service_class = ProductCreateService
 	serializer_class = ProductSerializer
+
+	def __init__(self, data: dict, user: User):
+		self.check_attributes()
+		self._data = data
+		self._user = user
+		self._create_service = self.create_service_class()
 
 
 class UpdateProductCommand(BaseUpdateCommand):
@@ -91,26 +104,11 @@ class GetAllProductReviewsCommand:
 		return response_data, 200
 
 
-class BaseConcreteProductReviewCommand:
-	"""Base command with logic to get a concrete product review"""
-
-	get_product_service_class = ProductsGetService
-	get_reviews_service_class = ProductReviewsGetService
-
-	def get_product_review(self) -> ProductReview:
-		"""
-		Get a concrete product by pk and find in this product
-		review using pk
-		"""
-		product = self._get_product_service.get_concrete(self._product_pk)
-		get_reviews_service = self.get_reviews_service_class(product)
-		review = get_reviews_service.get_concrete(self._review_pk)
-		return review
-
-
-class GetConcreteProductReviewCommand(BaseConcreteProductReviewCommand):
+class GetConcreteProductReviewCommand(BaseGetConcreteCommand):
 	"""Command to get a concrete product review"""
 
+	get_product_servcie_class = ProductsGetService
+	get_reviews_service_class = ProductReviewsGetService
 	serializer_class = ProductReviewSerializer
 
 	def __init__(self, product_pk: UUID, review_pk: UUID):
@@ -118,14 +116,12 @@ class GetConcreteProductReviewCommand(BaseConcreteProductReviewCommand):
 		self._review_pk = review_pk
 		self._get_product_service = self.get_product_service_class()
 
-	def execute(self) -> tuple[dict, int]:
-		"""
-		Get a concrete product review and return this serialized review
-		and status code of response
-		"""
-		review = self.get_product_review()
-		serialized_review = self.serializer_class(review)
-		return (serialized_review.data, 200)
+	def get_concrete_entry(self):
+		"""Return a concrete product review"""
+		product = self._get_product_service.get_concrete(self._product_pk)
+		get_reviews_service = self.get_reviews_service_class(product)
+		review = get_reviews_service.get_concrete(self._review_pk)
+		return review
 
 
 class CreateProductReviewCommand:
@@ -141,25 +137,13 @@ class CreateProductReviewCommand:
 		self._product_pk = pk
 		self._get_product_service = self.get_product_service_class()
 
-	def _create_review(self, serializer: ProductReviewSerializer) -> dict:
+	def create_entry(self, serializer: ProductReviewSerializer) -> dict:
 		"""Create a new review and return this serialized review"""
 		product = self._get_product_service.get_concrete(self._product_pk)
 		create_review_service = self.create_review_service_class(product)
 		review = create_review_service.create(serializer.data, self._user)
 		serialized_review = self.serializer_class(review).data
 		return serialized_review
-
-	def execute(self) -> tuple[dict, int]:
-		"""
-		Get a concrete product and create for this product a new review
-		using data and user
-		"""
-		serializer = self.serializer_class(data=self._data)
-		if serializer.is_valid():
-			serialized_review = self._create_review(serializer)
-			return (serialized_review, 201)
-
-		return (serializer.errors, 400)
 
 
 class UpdateProductReviewCommand(
