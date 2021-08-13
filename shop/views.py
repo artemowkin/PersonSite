@@ -13,7 +13,8 @@ from .services.base import (
 )
 from .services.commands import (
 	GetAllProductsCommand, CreateProductCommand, GetAllProductReviewsCommand,
-	CreateProductReviewCommand
+	CreateProductReviewCommand, GetConcreteProductCommand, UpdateProductCommand,
+	DeleteProductCommand
 )
 from .serializers import ProductSerializer, ProductReviewSerializer
 
@@ -28,10 +29,9 @@ class AllCreateProductsView(BaseAllCreateView):
 class ConcreteProductView(BaseConcreteView):
 	"""View to render a concrete product"""
 
-	get_service = ProductsGetService()
-	update_service = ProductUpdateService()
-	delete_service = ProductDeleteService()
-	serializer_class = ProductSerializer
+	get_command_class = GetConcreteProductCommand
+	update_command_class = UpdateProductCommand
+	delete_command_class = DeleteProductCommand
 
 class ProductImageUploadView(BaseUploadImageView):
 	"""View to upload image for product entry"""

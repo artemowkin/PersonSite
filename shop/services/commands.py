@@ -3,11 +3,13 @@ from uuid import UUID
 from django.contrib.auth import get_user_model
 
 from generic.services.commands import (
-	BaseGetAllCommand, BaseCreateCommand, BaseGetConcreteCommand
+	BaseGetAllCommand, BaseCreateCommand, BaseGetConcreteCommand,
+	BaseUpdateCommand, BaseDeleteCommand
 )
 from .base import (
 	ProductsGetService, ProductCreateService, ProductReviewsGetService,
-	ProductReviewCreateService, count_overall_rating
+	ProductReviewCreateService, ProductUpdateService, ProductDeleteService,
+	count_overall_rating
 )
 from ..serializers import ProductSerializer, ProductReviewSerializer
 
@@ -22,10 +24,33 @@ class GetAllProductsCommand(BaseGetAllCommand):
 	serializer_class = ProductSerializer
 
 
+class GetConcreteProductCommand(BaseGetConcreteCommand):
+	"""Command to get a concrete product"""
+
+	get_service_class = ProductsGetService
+	serializer_class = ProductSerializer
+
+
 class CreateProductCommand(BaseCreateCommand):
 	"""Command to create a new product"""
 
 	create_service_class = ProductCreateService
+	serializer_class = ProductSerializer
+
+
+class UpdateProductCommand(BaseUpdateCommand):
+	"""Command to update a concrete product"""
+
+	get_service_class = ProductsGetService
+	update_service_class = ProductUpdateService
+	serializer_class = ProductSerializer
+
+
+class DeleteProductCommand(BaseDeleteCommand):
+	"""Command to delete a concrete product"""
+
+	get_service_class = ProductsGetService
+	delete_service_class = ProductDeleteService
 	serializer_class = ProductSerializer
 
 

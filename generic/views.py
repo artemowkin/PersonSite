@@ -47,7 +47,6 @@ class BaseConcreteView(BaseCommandView):
 	get_command_class = None
 	update_command_class = None
 	delete_command_class = None
-	serializer_class = None
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -65,11 +64,6 @@ class BaseConcreteView(BaseCommandView):
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
 				"`delete_command_class` attribute"
-			)
-		if not self.serializer_class:
-			raise ImproperlyConfigured(
-				f"{self.__class__.__name__} must have "
-				"`serializer_class` attribute"
 			)
 
 	def get(self, request, pk):
