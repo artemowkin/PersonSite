@@ -5,15 +5,15 @@ from django.db.models import QuerySet, Avg
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
-from generic.services import (
+from generic.services.base import (
 	BaseGetService, BaseModelService, BaseCreateService,
 	BaseUpdateService, BaseDeleteService
 )
-from generic.strategies import (
+from generic.services.strategies import (
 	CheckIsUserAdminStrategy, CheckIsUserAuthenticatedStrategy
 )
 from .strategies import CheckIsUserAdminOrAuthorStrategy
-from .models import Product, ProductReview
+from ..models import Product, ProductReview
 
 
 User = get_user_model()

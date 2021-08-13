@@ -9,7 +9,7 @@ from generic.unit_tests import (
 	DeleteServiceMixin
 )
 from ..models import Product, ProductReview
-from ..services import (
+from ..services.base import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
 	ProductReviewUpdateService, ProductReviewDeleteService

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from generic.views import (
 	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
 )
-from .services import (
+from .services.base import (
 	ProductsGetService, ProductCreateService, ProductUpdateService,
 	ProductDeleteService, ProductReviewsGetService, ProductReviewCreateService,
 	ProductReviewUpdateService, ProductReviewDeleteService,

@@ -2,11 +2,11 @@ from typing import TextIO
 
 from django.db.models import QuerySet
 
-from generic.services import (
+from generic.services.base import (
 	BaseGetService, BaseModelService, BaseCreateService,
 	BaseUpdateService, BaseDeleteService
 )
-from generic.strategies import CheckIsUserAdminStrategy
+from generic.services.strategies import CheckIsUserAdminStrategy
 
 from .models import Post
 
