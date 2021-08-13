@@ -45,6 +45,7 @@ class BaseConcreteView(BaseCommandView):
 	"""Base view to render a concrete entry, update it, and delete it"""
 
 	get_command_class = None
+	update_command_class = None
 	get_service = None
 	update_service = None
 	delete_service = None
@@ -56,6 +57,11 @@ class BaseConcreteView(BaseCommandView):
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
 				"`get_command_class` attribute"
+			)
+		if not self.update_command_class:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`update_command_class` attribute"
 			)
 		if not self.get_service:
 			raise ImproperlyConfigured(
@@ -83,16 +89,10 @@ class BaseConcreteView(BaseCommandView):
 		return self.get_command_response(get_command)
 
 	def put(self, request, pk):
-		serializer = self.serializer_class(data=request.data)
-		if serializer.is_valid():
-			concrete_entry = self.get_service.get_concrete(pk)
-			changed_entry = self.update_service.update(
-				concrete_entry, serializer.data, request.user
-			)
-			serialized_entry = self.serializer_class(changed_entry)
-			return Response(serialized_entry.data, status=200)
-
-		return Response(serializer.errors, status=400)
+		update_command = self.update_command_class(
+			pk, request.data, request.user
+		)
+		return self.get_command_response(update_command)
 
 	def delete(self, request, pk):
 		concrete_entry = self.get_service.get_concrete(pk)

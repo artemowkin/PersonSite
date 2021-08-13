@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Model
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import Serializer
 
@@ -14,10 +15,7 @@ class BaseGetCommand:
 	get_service_class = None
 	serializer_class = None
 
-	def __init__(self):
-		self._check_attributes()
-
-	def _check_attributes(self):
+	def check_attributes(self):
 		if not self.get_service_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
@@ -34,7 +32,7 @@ class BaseGetAllCommand(BaseGetCommand):
 	"""Base command to get all entries"""
 
 	def __init__(self):
-		super().__init__()
+		self.check_attributes()
 		self._get_service = self.get_service_class()
 
 	def execute(self) -> tuple[dict, int]:
@@ -54,12 +52,12 @@ class BaseCreateCommand:
 	serializer_class = None
 
 	def __init__(self, data: dict, user: User):
-		self._check_attributes()
+		self.check_attributes()
 		self._data = data
 		self._user = user
 		self._create_service = self.create_service_class()
 
-	def _check_attributes(self):
+	def check_attributes(self):
 		if not self.create_service_class:
 			raise ImproperlyConfigured(
 				f"{self.__class__.__name__} must have "
@@ -94,7 +92,7 @@ class BaseGetConcreteCommand(BaseGetCommand):
 	"""Base command to get a concrete entry"""
 
 	def __init__(self, pk: UUID):
-		super().__init__()
+		self.check_attributes()
 		self._pk = pk
 		self._get_service = self.get_service_class()
 
@@ -106,3 +104,47 @@ class BaseGetConcreteCommand(BaseGetCommand):
 		concrete_entry = self._get_service.get_concrete(self._pk)
 		serializer = self.serializer_class(concrete_entry)
 		return (serializer.data, 200)
+
+
+class BaseUpdateCommand(BaseGetCommand):
+	"""Base command to update a concrete entry"""
+
+	update_service_class = None
+	serializer_class = None
+
+	def __init__(self, pk: UUID, data: dict, user: User):
+		self.check_attributes()
+		self._pk = pk
+		self._data = data
+		self._user = user
+		self._get_service = self.get_service_class()
+		self._update_service = self.update_service_class()
+
+	def check_attributes(self):
+		super().check_attributes()
+		if not self.update_service_class:
+			raise ImproperlyConfigured(
+				f"{self.__class__.__name__} must have "
+				"`update_service_class` attribute"
+			)
+
+	def execute(self) -> tuple[dict, int]:
+		"""
+		Create a new entry and return this serialized entry
+		(or error messages) and response status code
+		"""
+		serializer = self.serializer_class(data=self._data)
+		if serializer.is_valid():
+			concrete_entry = self._get_service.get_concrete(self._pk)
+			changed_entry = self._change_entry(concrete_entry)
+			return (changed_entry, 200)
+
+		return Response(serializer.errors, status=400)
+
+	def _change_entry(self, entry: Model) -> dict:
+		"""Change the entry and return this changed serilaized entry"""
+		changed_entry = self._update_service.update(
+			entry, serializer.data, self._user
+		)
+		serialized_entry = self.serializer_class(changed_entry)
+		return serialized_entry.data
