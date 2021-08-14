@@ -96,6 +96,19 @@ class AllProductsEndpointFunctionalTests(AllEndpointMixin, TestCase):
 			'title': ['product with this product title already exists.']
 		})
 
+	def test_create_a_new_entry_with_not_superuser(self):
+		"""
+		Test does POST on /shop/products/ with not a superuser
+		return 403 response
+		"""
+		new_user = User.objects.create_user(
+			username='justuser', password='pass'
+		)
+		self.client.login(username='justuser', password='pass')
+		response = self.request_create_a_new_entry()
+
+		self.assertEqual(response.status_code, 403)
+
 
 class ConcreteProductEndpointFunctionalTests(ConcreteEndpointMixin, TestCase):
 	"""Functional tests for /shop/products/{product_pk}/ endpoint"""
