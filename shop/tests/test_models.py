@@ -102,5 +102,9 @@ class ProductReviewModelTests(TestCase):
 
 	def test_absolute_url(self):
 		"""Test does get_absolute_url() return a valid url"""
-		# TODO: fix me
-		pass
+		self.assertEqual(
+			self.review.get_absolute_url(),
+			reverse('concrete_product_review', args=[
+				str(self.product.pk), str(self.review.pk)
+			])
+		)

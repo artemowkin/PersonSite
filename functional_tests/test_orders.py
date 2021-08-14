@@ -1,3 +1,4 @@
+import datetime
 import simplejson as json
 
 from django.test import TestCase
@@ -17,7 +18,7 @@ def _order_setup(testcase):
 		'postal_code': '123456', 'city': 'Moscow', 'customer': {
 			'pk': testcase.user.pk, 'username': testcase.user.username,
 			'email': testcase.user.email
-		}, 'status': 'processing'
+		}, 'status': 'processing', 'pub_date': str(datetime.date.today())
 	}
 
 
@@ -46,6 +47,8 @@ class AllOrdersEndpointFunctionalTests(AllEndpointMixin, TestCase):
 		self.assertIn('address', json_response)
 		self.assertIn('postal_code', json_response)
 		self.assertIn('city', json_response)
+		self.assertIn('status', json_response)
+		self.assertIn('pub_date', json_response)
 
 	def test_get_entries_with_not_authenticated_user(self):
 		self.client.logout()

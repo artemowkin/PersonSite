@@ -46,19 +46,6 @@ class AllEndpointMixin(BaseEndpointMixin):
 		self.check_created_entry_fields(json_response)
 		self.assertEqual(entries_count, 2)
 
-	def test_create_a_new_entry_with_not_superuser(self):
-		"""
-		Test does POST on /shop/products/ with not a superuser
-		return 403 response
-		"""
-		new_user = User.objects.create_user(
-			username='justuser', password='pass'
-		)
-		self.client.login(username='justuser', password='pass')
-		response = self.request_create_a_new_entry()
-
-		self.assertEqual(response.status_code, 403)
-
 
 class ConcreteEndpointMixin(BaseEndpointMixin):
 	"""

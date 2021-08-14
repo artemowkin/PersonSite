@@ -19,6 +19,7 @@ urlpatterns = [
     # Local
     path('posts/', include('posts.urls')),
     path('shop/products/', include('shop.urls')),
+    path('shop/orders/', include('orders.urls')),
 ]
 
 if settings.DEBUG:
