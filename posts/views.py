@@ -2,19 +2,24 @@ from generic.views import (
 	BaseAllCreateView, BaseConcreteView, BaseUploadImageView
 )
 from .services.base import PostGetService, PostUpdateService
-from .services.facades import PostCRUDFacade
+from .services.facades import (
+	PostGetFacade, PostCreateFacade, PostUpdateFacade, PostDeleteFacade
+)
 
 
 class AllCreatePostsView(BaseAllCreateView):
 	"""View to render all posts entries"""
 
-	facade_class = PostCRUDFacade
+	get_facade_class = PostGetFacade
+	create_facade_class = PostCreateFacade
 
 
 class ConcretePostView(BaseConcreteView):
 	"""View to render a concrete post entry"""
 
-	facade_class = PostCRUDFacade
+	get_facade_class = PostGetFacade
+	update_facade_class = PostUpdateFacade
+	delete_facade_class = PostDeleteFacade
 
 
 class PostPreviewUploadView(BaseUploadImageView):
