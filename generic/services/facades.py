@@ -6,8 +6,8 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class BaseAPICRUDFacade:
-	"""Base facade for CRUD API using services"""
+class BaseGetFacade:
+	"""Base facade to get entries using services"""
 
 	def get_concrete(self, pk: UUID) -> dict:
 		"""Return a concrete entry"""
@@ -21,6 +21,10 @@ class BaseAPICRUDFacade:
 		serialized_entries = self.serializer_class(all_entries, many=True).data
 		return (serialized_entries, 200)
 
+
+class BaseCreateFacade:
+	"""Base facade to create a new entry using services"""
+
 	def create(self, data: dict, user: User) -> tuple[dict, int]:
 		"""Create a new entry using data"""
 		serializer = self.serializer_class(data=data)
@@ -30,6 +34,10 @@ class BaseAPICRUDFacade:
 			return (serialized_entry, 201)
 
 		return (serializer.errors, 400)
+
+
+class BaseUpdateFacade:
+	"""Base facade to update a concrete entry using services"""
 
 	def update(self, pk: UUID, data: dict, user: User) -> tuple[dict, int]:
 		"""Update a concrete entry"""
@@ -41,6 +49,10 @@ class BaseAPICRUDFacade:
 			return (serialized_entry, 200)
 
 		return (serializer.errors, 400)
+
+
+class BaseDeleteFacade:
+	"""Base facade to delete a concrete entry using services"""
 
 	def delete(self, pk: UUID, user: User) -> tuple[type[None], int]:
 		"""Delete a concrete entry"""
