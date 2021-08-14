@@ -41,5 +41,5 @@ class PostDeleteFacade(BaseDeleteFacade):
 	serializer_class = PostSerializer
 
 	def __init__(self):
-		self.get_service = PostGetService
-		self.delete_service = PostDeleteService
+		self.get_service = PostGetService()
+		self.delete_service = PostDeleteService()

@@ -1,6 +1,8 @@
 from uuid import UUID
 
-from generic.services.facades import BaseAPICRUDFacade
+from generic.services.facades import (
+	BaseGetFacade, BaseCreateFacade, BaseUpdateFacade, BaseDeleteFacade
+)
 from .base import (
 	ProductsGetService, ProductReviewsGetService, ProductReviewCreateService,
 	ProductReviewUpdateService, ProductReviewDeleteService,
@@ -10,20 +12,46 @@ from .base import (
 from ..serializers import ProductSerializer, ProductReviewSerializer
 
 
-class ProductCRUDFacade(BaseAPICRUDFacade):
-	"""Facade for product with CRUD functionality using services"""
+class ProductGetFacade(BaseGetFacade):
+	"""Facade to get products using services"""
 
 	serializer_class = ProductSerializer
 
 	def __init__(self):
 		self.get_service = ProductsGetService()
+
+
+class ProductCreateFacade(BaseCreateFacade):
+	"""Facade to create a new product using services"""
+
+	serializer_class = ProductSerializer
+
+	def __init__(self):
 		self.create_service = ProductCreateService()
+
+
+class ProductUpdateFacade(BaseUpdateFacade):
+	"""Facade to update a concrete product using services"""
+
+	serializer_class = ProductSerializer
+
+	def __init__(self):
+		self.get_service = ProductsGetService()
 		self.update_service = ProductUpdateService()
+
+
+class ProductDeleteFacade(BaseDeleteFacade):
+	"""Facade to delete a concrete product using services"""
+
+	serializer_class = ProductSerializer
+
+	def __init__(self):
+		self.get_service = ProductsGetService()
 		self.delete_service = ProductDeleteService()
 
 
-class ProductReviewCRUDFacade(BaseAPICRUDFacade):
-	"""Facade for product reviews with CRUD functionality using services"""
+class ProductReviewGetFacade(BaseGetFacade):
+	"""Facade to get product reviews using services"""
 
 	serializer_class = ProductReviewSerializer
 
@@ -31,9 +59,6 @@ class ProductReviewCRUDFacade(BaseAPICRUDFacade):
 		product_get_service = ProductsGetService()
 		product = product_get_service.get_concrete(product_pk)
 		self.get_service = ProductReviewsGetService(product)
-		self.create_service = ProductReviewCreateService(product)
-		self.update_service = ProductReviewUpdateService()
-		self.delete_service = ProductReviewDeleteService()
 
 	def get_all(self) -> tuple[dict, int]:
 		"""Return all product reviews with their overall rating"""
@@ -42,3 +67,38 @@ class ProductReviewCRUDFacade(BaseAPICRUDFacade):
 		serialized_reviews = self.serializer_class(all_reviews, many=True).data
 		data = {'overall_rating': overall_rating, 'reviews': serialized_reviews}
 		return (data, 200)
+
+
+class ProductReviewCreateFacade(BaseCreateFacade):
+	"""Facade to create a new product review using services"""
+
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, product_pk: UUID):
+		product_get_service = ProductsGetService()
+		product = product_get_service.get_concrete(product_pk)
+		self.create_service = ProductReviewCreateService(product)
+
+
+class ProductReviewUpdateFacade(BaseUpdateFacade):
+	"""Facade to update a concrete product review using services"""
+
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, product_pk: UUID):
+		product_get_service = ProductsGetService()
+		product = product_get_service.get_concrete(product_pk)
+		self.get_service = ProductReviewsGetService(product)
+		self.update_service = ProductReviewUpdateService()
+
+
+class ProductReviewDeleteFacade(BaseDeleteFacade):
+	"""Facade to delete a concrete product review using services"""
+
+	serializer_class = ProductReviewSerializer
+
+	def __init__(self, product_pk: UUID):
+		product_get_service = ProductsGetService()
+		product = product_get_service.get_concrete(product_pk)
+		self.get_service = ProductReviewsGetService(product)
+		self.delete_service = ProductReviewDeleteService()
