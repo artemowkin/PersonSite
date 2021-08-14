@@ -210,20 +210,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  pk:
-                    type: string
-                    format: uuid
-                    minLength: 36
-                    maxLength: 36
-                  title:
-                    type: string
-                    minLength: 1
-                    maxLength: 255
-                  text:
-                    type: string
-                    minLength: 1
+                $ref: "#/components/schemas/Post"
           description: ''
         '400':
           content:
@@ -466,42 +453,7 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  pk:
-                    type: string
-                    readOnly: true
-                    format: uuid
-                    pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
-                    minLength: 36
-                    maxLength: 36
-                  title:
-                    type: string
-                    minLength: 1
-                    maxLength: 255
-                  short_description:
-                    type: string
-                    minLength: 1
-                    maxLength: 255
-                  description:
-                    type: string
-                    minLength: 1
-                  price:
-                    type: number
-                    format: double
-                    example: "100.00"
-                  amount:
-                    type: integer
-                    example: 100
-                  available:
-                    type: boolean
-                    example: true
-                required:
-                - pk
-                - title
-                - short_description
-                - description
-                - price
-                - amount
+                $ref: "#/components/schemas/Product"
           description: ''
         '400':
           content:
@@ -755,21 +707,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  pk:
-                    type: string
-                    format: uuid
-                    minLength: 36
-                    maxLength: 36
-                  text:
-                    type: string
-                    minLength: 1
-                  rating:
-                    type: integer
-                    minimum: 1
-                    maximum: 5
-                    example: 5
+                $ref: "#/components/schemas/ProductReview"
           description: ''
         '400':
           content:
