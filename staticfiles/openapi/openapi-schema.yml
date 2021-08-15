@@ -871,7 +871,91 @@ paths:
                     example: "You do not have permission to perform this action."
           description: 'When user who is not a superuser or who is not
 
-          an author of review tries to delete the product'
+          an author of review tries to delete the review'
+      tags:
+      - shop
+  /shop/orders/:
+    get:
+      operationId: getShopUserOrders
+      description: Return all user orders in shop
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+      tags:
+        - shop
+    post:
+      operationId: createNewShopUserOrder
+      description: Create a new user order in shop
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                last_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                address:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                postal_code:
+                  type: string
+                  minLength: 1
+                  maxLength: 20
+                city:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                status:
+                  type: string
+                  enum: [processing, viewed, sent, arrived]
+                  description: Only admins cat set the status
+              required:
+              - first_name
+              - last_name
+              - address
+              - postal_code
+              - city
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first_name:
+                    type: array
+                    items:
+                      type: string
+                      example: "This field may not be blank."
+          description: 'Error with data in request'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "You do not have permission to perform this action."
+          description: 'When user who is not authenticated tries to create the order'
       tags:
       - shop
 components:
@@ -1035,3 +1119,61 @@ components:
       required:
       - text
       - rating
+    Order:
+      type: object
+      properties:
+        pk:
+          type: string
+          readOnly: true
+          format: uuid
+          pattern: "[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}"
+          minLength: 36
+          maxLength: 36
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        postal_code:
+          type: string
+          minLength: 1
+          maxLength: 20
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+        status:
+          type: string
+          enum: [processing, viewed, sent, arrived]
+        customer:
+          type: object
+          properties:
+            pk:
+              type: integer
+              readOnly: true
+            username:
+              type: string
+              description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+                only.
+              pattern: ^[\w.@+-]+\z
+              maxLength: 150
+            email:
+              type: string
+              format: email
+              readOnly: true
+        pub_date:
+          type: string
+          format: date
+      required:
+      - first_name
+      - last_name
+      - address
+      - postal_code
+      - city
